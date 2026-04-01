@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sunrise Machine</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+
+  <!-- D3 micro -->
+  <script src="https://cdn.jsdelivr.net/npm/d3-scale@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-color@3"></script>
+
+  <!-- GSAP + ScrollTrigger -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12/dist/ScrollTrigger.min.js"></script>
+
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4/dist/tf.min.js"></script>
+
+  <!-- KaTeX (deferred) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+
+  <style>
+    /* ============================================
+       CSS CUSTOM PROPERTIES
+       ============================================ */
+    :root {
+      --encoder-primary: #6C8EBF;
+      --decoder-primary: #D4845A;
+      --interactive-glow: rgba(255, 200, 120, 0.3);
+      --accent: #F2C94C;
+      --text-on-dark: #E8E4DF;
+      --text-on-light: #1A1A2E;
+      --bg-color: #0B0E1A;
+    }
+
+    /* ============================================
+       RESET & BASE
+       ============================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.7;
+      color: var(--text-on-dark);
+      background-color: var(--bg-color);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3 {
+      font-family: 'DM Serif Display', serif;
+      font-weight: 400;
+    }
+
+    code, .coord {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ============================================
+       HEADER / PROGRESS DOTS
+       ============================================ */
+    header {
+      position: fixed;
+      top: 0;
+      right: clamp(1rem, 3vw, 2rem);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      padding-top: 2rem;
+    }
+
+    .progress-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .progress-dot.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      transform: scale(1.3);
+    }
+
+    /* ============================================
+       SECTIONS
+       ============================================ */
+    section {
+      position: relative;
+      width: 100%;
+      padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 5vw, 6rem);
+    }
+
+    section[data-act="1"] {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    section[data-act="1"] h1 {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      margin-bottom: 1rem;
+      opacity: 0;
+    }
+
+    section[data-act="1"] .subtitle {
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      opacity: 0;
+      max-width: 500px;
+      color: rgba(232, 228, 223, 0.8);
+    }
+
+    /* Act II: sticky two-column layout */
+    section[data-act="2"] {
+      min-height: 200vh;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .sticky-container {
+      display: flex;
+      gap: clamp(1rem, 3vw, 3rem);
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 clamp(1rem, 3vw, 3rem);
+    }
+
+    .text-column {
+      flex: 0 0 55%;
+      padding-top: 2rem;
+    }
+
+    .text-column h2 {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      margin-bottom: 1.5rem;
+    }
+
+    .text-column p {
+      margin-bottom: 1.5rem;
+      font-size: clamp(0.9rem, 2vw, 1.05rem);
+      max-width: 50ch;
+    }
+
+    .canvas-column {
+      flex: 0 0 45%;
+      position: sticky;
+      top: 10vh;
+      height: fit-content;
+      align-self: flex-start;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      width: min(500px, 100%);
+      aspect-ratio: 1;
+    }
+
+    #latent-canvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      cursor: crosshair;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #canvas-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    #decoded-panel {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    #decoded-panel.visible {
+      opacity: 1;
+    }
+
+    #decoded-image {
+      width: 128px;
+      height: 128px;
+      border-radius: 6px;
+      border: 2px solid var(--decoder-primary);
+      image-rendering: pixelated;
+    }
+
+    #coord-readout {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--decoder-primary);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+    }
+
+    /* Acts III, IV, V: placeholder styling */
+    section[data-act="3"],
+    section[data-act="4"],
+    section[data-act="5"] {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    section h2 {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      margin-bottom: 1rem;
+    }
+
+    .placeholder-text {
+      font-size: 1rem;
+      opacity: 0.5;
+      font-style: italic;
+    }
+
+    /* ============================================
+       LOADING INDICATOR
+       ============================================ */
+    #loading-indicator {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 1.5rem;
+      z-index: 100;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent);
+      background: rgba(0, 0, 0, 0.6);
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      transition: opacity 0.5s;
+    }
+
+    #loading-indicator.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+    @media (max-width: 768px) {
+      .sticky-container {
+        flex-direction: column;
+      }
+
+      .text-column {
+        flex: none;
+        width: 100%;
+      }
+
+      .canvas-column {
+        position: relative;
+        top: auto;
+        flex: none;
+        width: 100%;
+      }
+
+      .canvas-wrap {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      header {
+        flex-direction: row;
+        top: auto;
+        bottom: 1rem;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        padding-top: 0;
+      }
+    }
+
+    /* ============================================
+       REDUCED MOTION
+       ============================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      html {
+        scroll-behavior: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Progress dots -->
+  <header>
+    <div class="progress-dot active" data-target="1" title="Act I"></div>
+    <div class="progress-dot" data-target="2" title="Act II"></div>
+    <div class="progress-dot" data-target="3" title="Act III"></div>
+    <div class="progress-dot" data-target="4" title="Act IV"></div>
+    <div class="progress-dot" data-target="5" title="Act V"></div>
+  </header>
+
+  <!-- ACT I: Hook -->
+  <section data-act="1" id="act-hook">
+    <h1>Sunrise Machine</h1>
+    <p class="subtitle">What if two numbers could paint a sunrise?</p>
+    <!-- Placeholder for grid/scatter (Agent 5 will add) -->
+  </section>
+
+  <!-- ACT II: Decoder -->
+  <section data-act="2" id="act-decoder">
+    <div class="sticky-container">
+      <div class="text-column">
+        <h2>The Decoder</h2>
+        <p>
+          Somewhere inside a neural network lives a tiny world of sunrises.
+          Every point in this two-dimensional space maps to a unique image —
+          a gradient of color, light, and atmosphere.
+        </p>
+        <p>
+          The horizontal axis captures something like <em>time of year</em>:
+          cool winter blues on the left, warm summer golds on the right.
+        </p>
+        <p>
+          The vertical axis captures <em>time of day</em>:
+          deep pre-dawn darkness below, bright midday light above.
+        </p>
+        <p>
+          <strong>Click anywhere on the canvas</strong> to decode a sunrise
+          from its latent coordinates.
+        </p>
+      </div>
+      <div class="canvas-column">
+        <div class="canvas-wrap">
+          <canvas id="latent-canvas"></canvas>
+          <svg id="canvas-overlay" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+        <div id="decoded-panel">
+          <canvas id="decoded-image" width="256" height="256"></canvas>
+          <div id="coord-readout">z = (0.00, 0.00)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACT III: Encoder -->
+  <section data-act="3" id="act-encoder">
+    <h2>The Encoder</h2>
+    <p class="placeholder-text">Encoder experience coming soon…</p>
+  </section>
+
+  <!-- ACT IV: Variational -->
+  <section data-act="4" id="act-variational">
+    <h2>Why "Variational"?</h2>
+    <p class="placeholder-text">Temperature and beta controls coming soon…</p>
+  </section>
+
+  <!-- ACT V: Sandbox -->
+  <section data-act="5" id="act-sandbox">
+    <h2>Your Turn</h2>
+    <p class="placeholder-text">Game and sandbox coming soon…</p>
+  </section>
+
+  <!-- Loading indicator -->
+  <div id="loading-indicator">Loading model…</div>
+
+  <script>
+    /* ============================================
+       CONFIG
+       ============================================ */
+    const CONFIG = {
+      LATENT_RANGE: [-3, 3],
+      CANVAS_SIZE: 500,
+      DECODED_SIZE: 256,
+      ATLAS_GRID: 24,
+      ATLAS_CELL: 64,
+      COLORS: {
+        encoderPrimary: '#6C8EBF',
+        decoderPrimary: '#D4845A',
+        interactiveGlow: 'rgba(255, 200, 120, 0.3)',
+        accent: '#F2C94C',
+        textOnDark: '#E8E4DF',
+        textOnLight: '#1A1A2E',
+      },
+      BG_STOPS: ['#0B0E1A', '#141832', '#2A1F4E', '#4A2545', '#7A3B2E', '#C2753A', '#E8A84C', '#FFF8F0'],
+    };
+
+    /* ============================================
+       STATE
+       ============================================ */
+    const state = {
+      scrollProgress: 0,
+      currentAct: 1,
+      modelReady: false,
+      useSpriteFallback: false,
+      latentCursor: null,
+      pinnedPoints: [],
+      decoder: null,
+      atlasImage: null,
+      atlasLoaded: false,
+      latentCoords: null,
+    };
+
+    /* ============================================
+       D3 SCALES
+       ============================================ */
+    const xScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([0, CONFIG.CANVAS_SIZE]);
+    const yScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([CONFIG.CANVAS_SIZE, 0]);
+    const bgInterpolator = d3.interpolateRgbBasis(CONFIG.BG_STOPS);
+
+    /* ============================================
+       DOM REFS
+       ============================================ */
+    const latentCanvas = document.getElementById('latent-canvas');
+    const latentCtx = latentCanvas.getContext('2d');
+    const decodedCanvas = document.getElementById('decoded-image');
+    const decodedCtx = decodedCanvas.getContext('2d');
+    const coordReadout = document.getElementById('coord-readout');
+    const decodedPanel = document.getElementById('decoded-panel');
+    const canvasOverlay = document.getElementById('canvas-overlay');
+    const loadingIndicator = document.getElementById('loading-indicator');
+
+    /* ============================================
+       CANVAS SETUP
+       ============================================ */
+    function setupCanvas() {
+      const wrap = latentCanvas.parentElement;
+      const size = Math.min(wrap.clientWidth, CONFIG.CANVAS_SIZE);
+      latentCanvas.width = size;
+      latentCanvas.height = size;
+      xScale.range([0, size]);
+      yScale.range([size, 0]);
+      drawLatentSpace();
+    }
+
+    /* ============================================
+       SVG AXES
+       ============================================ */
+    function drawAxes() {
+      const ns = 'http://www.w3.org/2000/svg';
+      canvasOverlay.innerHTML = '';
+
+      const pad = 30;
+      const size = CONFIG.CANVAS_SIZE;
+
+      // Axis lines
+      const xLine = document.createElementNS(ns, 'line');
+      Object.entries({ x1: pad, y1: size - pad, x2: size - 5, y2: size - pad, stroke: 'rgba(255,255,255,0.4)', 'stroke-width': 1 }).forEach(([k, v]) => xLine.setAttribute(k, v));
+      canvasOverlay.appendChild(xLine);
+
+      const yLine = document.createElementNS(ns, 'line');
+      Object.entries({ x1: pad, y1: 5, x2: pad, y2: size - pad, stroke: 'rgba(255,255,255,0.4)', 'stroke-width': 1 }).forEach(([k, v]) => yLine.setAttribute(k, v));
+      canvasOverlay.appendChild(yLine);
+
+      // Labels
+      const xLabel = document.createElementNS(ns, 'text');
+      xLabel.setAttribute('x', size / 2);
+      xLabel.setAttribute('y', size - 5);
+      xLabel.setAttribute('text-anchor', 'middle');
+      xLabel.setAttribute('fill', 'rgba(255,255,255,0.6)');
+      xLabel.setAttribute('font-size', '12');
+      xLabel.setAttribute('font-family', 'Inter, sans-serif');
+      xLabel.textContent = 'time of year →';
+      canvasOverlay.appendChild(xLabel);
+
+      const yLabel = document.createElementNS(ns, 'text');
+      yLabel.setAttribute('x', 12);
+      yLabel.setAttribute('y', size / 2);
+      yLabel.setAttribute('text-anchor', 'middle');
+      yLabel.setAttribute('fill', 'rgba(255,255,255,0.6)');
+      yLabel.setAttribute('font-size', '12');
+      yLabel.setAttribute('font-family', 'Inter, sans-serif');
+      yLabel.setAttribute('transform', `rotate(-90, 12, ${size / 2})`);
+      yLabel.textContent = 'time of day →';
+      canvasOverlay.appendChild(yLabel);
+
+      // Tick marks
+      const ticks = [-2, -1, 0, 1, 2];
+      ticks.forEach(t => {
+        const xPos = xScale(t);
+        const yPos = yScale(t);
+
+        // X-axis ticks
+        const xTick = document.createElementNS(ns, 'text');
+        xTick.setAttribute('x', xPos);
+        xTick.setAttribute('y', size - pad + 15);
+        xTick.setAttribute('text-anchor', 'middle');
+        xTick.setAttribute('fill', 'rgba(255,255,255,0.4)');
+        xTick.setAttribute('font-size', '10');
+        xTick.setAttribute('font-family', 'JetBrains Mono, monospace');
+        xTick.textContent = t;
+        canvasOverlay.appendChild(xTick);
+
+        // Y-axis ticks
+        const yTick = document.createElementNS(ns, 'text');
+        yTick.setAttribute('x', pad - 8);
+        yTick.setAttribute('y', yPos + 3);
+        yTick.setAttribute('text-anchor', 'end');
+        yTick.setAttribute('fill', 'rgba(255,255,255,0.4)');
+        yTick.setAttribute('font-size', '10');
+        yTick.setAttribute('font-family', 'JetBrains Mono, monospace');
+        yTick.textContent = t;
+        canvasOverlay.appendChild(yTick);
+      });
+    }
+
+    /* ============================================
+       DRAW LATENT SPACE (training points)
+       ============================================ */
+    function drawLatentSpace() {
+      const w = latentCanvas.width;
+      const h = latentCanvas.height;
+      latentCtx.clearRect(0, 0, w, h);
+
+      // Subtle grid
+      latentCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      latentCtx.lineWidth = 1;
+      for (let t = -3; t <= 3; t++) {
+        const x = xScale(t);
+        const y = yScale(t);
+        latentCtx.beginPath(); latentCtx.moveTo(x, 0); latentCtx.lineTo(x, h); latentCtx.stroke();
+        latentCtx.beginPath(); latentCtx.moveTo(0, y); latentCtx.lineTo(w, y); latentCtx.stroke();
+      }
+
+      // Training points
+      if (state.latentCoords) {
+        state.latentCoords.forEach(pt => {
+          const cx = xScale(pt.z[0]);
+          const cy = yScale(pt.z[1]);
+          latentCtx.beginPath();
+          latentCtx.arc(cx, cy, 2, 0, Math.PI * 2);
+          latentCtx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+          latentCtx.fill();
+        });
+      }
+    }
+
+    /* ============================================
+       MODEL LOADING (TF.js)
+       ============================================ */
+    async function loadModel() {
+      try {
+        state.decoder = await tf.loadGraphModel('assets/model/decoder.json');
+        // Warmup: 3 inferences
+        for (let i = 0; i < 3; i++) {
+          const dummy = tf.tensor2d([[0, 0]]);
+          const out = state.decoder.predict(dummy);
+          out.dispose();
+          dummy.dispose();
+        }
+        state.modelReady = true;
+        updateLoadingStatus('Model ready');
+        setTimeout(() => loadingIndicator.classList.add('hidden'), 1500);
+      } catch (e) {
+        console.warn('TF.js model load failed, using sprite fallback:', e.message);
+        state.useSpriteFallback = true;
+        if (state.atlasLoaded) {
+          updateLoadingStatus('Using sprite atlas');
+          setTimeout(() => loadingIndicator.classList.add('hidden'), 1500);
+        }
+      }
+    }
+
+    /* ============================================
+       SPRITE ATLAS
+       ============================================ */
+    function loadAtlas() {
+      return new Promise((resolve) => {
+        state.atlasImage = new Image();
+        state.atlasImage.onload = () => {
+          state.atlasLoaded = true;
+          if (state.useSpriteFallback) {
+            updateLoadingStatus('Atlas ready (fallback)');
+            setTimeout(() => loadingIndicator.classList.add('hidden'), 1500);
+          }
+          resolve();
+        };
+        state.atlasImage.onerror = () => {
+          console.warn('Sprite atlas not found');
+          resolve();
+        };
+        state.atlasImage.src = 'assets/sprites/atlas.webp';
+      });
+    }
+
+    /* ============================================
+       DECODE FUNCTIONS
+       ============================================ */
+    async function decodeTFJS(z1, z2) {
+      if (!state.decoder) return null;
+      const input = tf.tensor2d([[z1, z2]]);
+      const output = state.decoder.predict(input);
+      const data = await output.data();
+      input.dispose();
+      output.dispose();
+      return data;
+    }
+
+    function decodeFromAtlas(z1, z2) {
+      if (!state.atlasLoaded || !state.atlasImage) return null;
+
+      const grid = CONFIG.ATLAS_GRID;
+      const cell = CONFIG.ATLAS_CELL;
+      const [lo, hi] = CONFIG.LATENT_RANGE;
+      const range = hi - lo;
+
+      // Map z to continuous grid position
+      const gx = ((z1 - lo) / range) * (grid - 1);
+      const gy = ((hi - z2) / range) * (grid - 1); // flip Y
+
+      // Clamp
+      const gxc = Math.max(0, Math.min(grid - 2, Math.floor(gx)));
+      const gyc = Math.max(0, Math.min(grid - 2, Math.floor(gy)));
+      const fx = gx - gxc;
+      const fy = gy - gyc;
+
+      // Bilinear interpolation: draw 4 cells blended
+      const offscreen = document.createElement('canvas');
+      offscreen.width = cell;
+      offscreen.height = cell;
+      const octx = offscreen.getContext('2d');
+
+      const cells = [
+        { x: gxc, y: gyc, w: (1 - fx) * (1 - fy) },
+        { x: gxc + 1, y: gyc, w: fx * (1 - fy) },
+        { x: gxc, y: gyc + 1, w: (1 - fx) * fy },
+        { x: gxc + 1, y: gyc + 1, w: fx * fy },
+      ];
+
+      cells.forEach(({ x, y, w }) => {
+        if (w < 0.001) return;
+        octx.globalAlpha = w;
+        octx.drawImage(state.atlasImage, x * cell, y * cell, cell, cell, 0, 0, cell, cell);
+      });
+      octx.globalAlpha = 1.0;
+
+      return offscreen;
+    }
+
+    async function decodeAuto(z1, z2) {
+      if (state.modelReady && !state.useSpriteFallback) {
+        const start = performance.now();
+        const data = await decodeTFJS(z1, z2);
+        const elapsed = performance.now() - start;
+        if (data) {
+          renderDecodedData(data);
+          // If too slow, switch to fallback
+          if (elapsed > 100) {
+            console.warn(`Decode took ${elapsed.toFixed(0)}ms, switching to atlas fallback`);
+            state.useSpriteFallback = true;
+          }
+          return;
+        }
+      }
+
+      // Atlas fallback
+      const atlasResult = decodeFromAtlas(z1, z2);
+      if (atlasResult) {
+        decodedCtx.clearRect(0, 0, CONFIG.DECODED_SIZE, CONFIG.DECODED_SIZE);
+        decodedCtx.imageSmoothingEnabled = false;
+        decodedCtx.drawImage(atlasResult, 0, 0, CONFIG.DECODED_SIZE, CONFIG.DECODED_SIZE);
+      }
+    }
+
+    function renderDecodedData(data) {
+      // data is Float32Array from TF.js, shape [1, 32, 32, 3] flattened
+      const size = 32;
+      const imgData = decodedCtx.createImageData(size, size);
+      for (let i = 0; i < size * size; i++) {
+        imgData.data[i * 4 + 0] = Math.round(data[i * 3 + 0] * 255);
+        imgData.data[i * 4 + 1] = Math.round(data[i * 3 + 1] * 255);
+        imgData.data[i * 4 + 2] = Math.round(data[i * 3 + 2] * 255);
+        imgData.data[i * 4 + 3] = 255;
+      }
+      // Draw to offscreen then scale up
+      const offscreen = document.createElement('canvas');
+      offscreen.width = size;
+      offscreen.height = size;
+      offscreen.getContext('2d').putImageData(imgData, 0, 0);
+      decodedCtx.clearRect(0, 0, CONFIG.DECODED_SIZE, CONFIG.DECODED_SIZE);
+      decodedCtx.imageSmoothingEnabled = false;
+      decodedCtx.drawImage(offscreen, 0, 0, CONFIG.DECODED_SIZE, CONFIG.DECODED_SIZE);
+    }
+
+    /* ============================================
+       CLICK HANDLER (latent canvas)
+       ============================================ */
+    latentCanvas.addEventListener('click', async (e) => {
+      const rect = latentCanvas.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width * latentCanvas.width;
+      const py = (e.clientY - rect.top) / rect.height * latentCanvas.height;
+      const z1 = xScale.invert(px);
+      const z2 = yScale.invert(py);
+
+      coordReadout.textContent = `z = (${z1.toFixed(2)}, ${z2.toFixed(2)})`;
+      decodedPanel.classList.add('visible');
+
+      await decodeAuto(z1, z2);
+    });
+
+    /* ============================================
+       LOAD LATENT COORDS
+       ============================================ */
+    async function loadLatentCoords() {
+      try {
+        const resp = await fetch('assets/data/latent_coords.json');
+        if (!resp.ok) throw new Error('Not found');
+        state.latentCoords = await resp.json();
+        drawLatentSpace();
+      } catch (e) {
+        console.warn('latent_coords.json not found:', e.message);
+      }
+    }
+
+    /* ============================================
+       SCROLL CONTROLLER
+       ============================================ */
+    function setupScroll() {
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Background gradient driven by scroll
+      ScrollTrigger.create({
+        trigger: 'body',
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (self) => {
+          state.scrollProgress = self.progress;
+          document.body.style.backgroundColor = bgInterpolator(self.progress);
+
+          // Text color transition: dark text for light backgrounds (acts 4-5)
+          if (self.progress > 0.65) {
+            document.body.style.color = CONFIG.COLORS.textOnLight;
+          } else {
+            document.body.style.color = CONFIG.COLORS.textOnDark;
+          }
+        },
+      });
+
+      // Track current act
+      document.querySelectorAll('section[data-act]').forEach(section => {
+        ScrollTrigger.create({
+          trigger: section,
+          start: 'top center',
+          end: 'bottom center',
+          onEnter: () => setCurrentAct(parseInt(section.dataset.act)),
+          onEnterBack: () => setCurrentAct(parseInt(section.dataset.act)),
+        });
+      });
+
+      // Act I entrance animation
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!prefersReduced) {
+        gsap.to('#act-hook h1', { opacity: 1, y: 0, duration: 1.2, delay: 0.3 });
+        gsap.from('#act-hook h1', { y: 30, duration: 1.2, delay: 0.3 });
+        gsap.to('#act-hook .subtitle', { opacity: 1, y: 0, duration: 1, delay: 0.8 });
+        gsap.from('#act-hook .subtitle', { y: 20, duration: 1, delay: 0.8 });
+      } else {
+        document.querySelector('#act-hook h1').style.opacity = 1;
+        document.querySelector('#act-hook .subtitle').style.opacity = 1;
+      }
+    }
+
+    function setCurrentAct(act) {
+      state.currentAct = act;
+      document.querySelectorAll('.progress-dot').forEach(dot => {
+        dot.classList.toggle('active', parseInt(dot.dataset.target) === act);
+      });
+    }
+
+    /* ============================================
+       PROGRESS DOT NAVIGATION
+       ============================================ */
+    document.querySelectorAll('.progress-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        const target = document.getElementById(
+          ['', 'act-hook', 'act-decoder', 'act-encoder', 'act-variational', 'act-sandbox'][parseInt(dot.dataset.target)]
+        );
+        if (target) target.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    /* ============================================
+       LOADING STATUS
+       ============================================ */
+    function updateLoadingStatus(msg) {
+      loadingIndicator.textContent = msg;
+    }
+
+    /* ============================================
+       INIT
+       ============================================ */
+    async function init() {
+      setupCanvas();
+      drawAxes();
+
+      // Load assets in parallel
+      const atlasPromise = loadAtlas();
+      const modelPromise = loadModel();
+      const coordsPromise = loadLatentCoords();
+
+      // Show content immediately
+      setupScroll();
+
+      // Wait for all loads
+      await Promise.all([atlasPromise, modelPromise, coordsPromise]);
+
+      // If neither model nor atlas loaded, show a friendly message
+      if (!state.modelReady && !state.atlasLoaded) {
+        updateLoadingStatus('Assets not found — place model & atlas in web/assets/');
+      }
+    }
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      setupCanvas();
+    });
+
+    // Boot
+    init();
+  </script>
+</body>
+</html>
