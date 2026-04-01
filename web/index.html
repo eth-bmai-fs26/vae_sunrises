@@ -633,6 +633,359 @@
     }
 
     /* ============================================
+       HERO LISSAJOUS (Act I)
+       ============================================ */
+    #hero-lissajous {
+      margin-top: 2rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    #hero-image {
+      width: 384px;
+      height: 384px;
+      max-width: 80vw;
+      max-height: 80vw;
+      border-radius: 12px;
+      image-rendering: pixelated;
+      box-shadow: 0 0 60px rgba(255, 200, 120, 0.25), 0 0 120px rgba(255, 140, 60, 0.1);
+    }
+
+    /* ============================================
+       TEMPERATURE SLIDER (Act IV)
+       ============================================ */
+    #temperature-section {
+      width: 100%;
+      max-width: 600px;
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    #temperature-section h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .slider-row input[type="range"] {
+      flex: 1;
+      accent-color: var(--decoder-primary);
+    }
+
+    .slider-row span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      min-width: 5ch;
+    }
+
+    #sample-filmstrip {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    #sample-filmstrip canvas {
+      width: 64px;
+      height: 64px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      image-rendering: pixelated;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    #temp-contour {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    /* ============================================
+       BETA / KL SLIDER (Act IV)
+       ============================================ */
+    #kl-section {
+      width: 100%;
+      max-width: 600px;
+      margin-top: 3rem;
+      text-align: center;
+    }
+
+    #kl-section h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    #tug-of-war {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .tug-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      opacity: 0.7;
+      white-space: nowrap;
+    }
+
+    #beta-demo {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .beta-demo-card {
+      text-align: center;
+    }
+
+    .beta-demo-card canvas {
+      width: 128px;
+      height: 128px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      image-rendering: pixelated;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .beta-demo-card p {
+      font-size: 0.75rem;
+      margin-top: 0.3rem;
+      opacity: 0.6;
+    }
+
+    /* ============================================
+       FIND THE SUNRISE GAME (Act V)
+       ============================================ */
+    #game-container {
+      width: 100%;
+      max-width: 700px;
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    #game-target {
+      margin-bottom: 1rem;
+    }
+
+    #game-target p {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      opacity: 0.8;
+    }
+
+    #target-image {
+      border-radius: 8px;
+      border: 2px solid var(--accent);
+      image-rendering: pixelated;
+      box-shadow: 0 0 20px rgba(242, 201, 76, 0.3);
+    }
+
+    #game-canvas-wrapper {
+      position: relative;
+      display: inline-block;
+      margin: 1rem 0;
+    }
+
+    #game-latent-canvas {
+      border-radius: 8px;
+      cursor: crosshair;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #game-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    #game-score {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+
+    #distance-meter {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: conic-gradient(var(--meter-color, #333) calc(var(--meter-pct, 0) * 1%), #333 0);
+    }
+
+    #distance-meter::after {
+      content: '';
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--bg-color);
+      position: absolute;
+    }
+
+    #score-text, #guess-count-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+    }
+
+    #game-guess-preview {
+      margin: 0.5rem 0;
+    }
+
+    #game-guess-preview canvas {
+      width: 96px;
+      height: 96px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      image-rendering: pixelated;
+    }
+
+    #game-feedback {
+      font-style: italic;
+      opacity: 0.8;
+      min-height: 1.5em;
+      margin: 0.5rem 0;
+    }
+
+    #game-controls {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      align-items: center;
+      margin: 1rem 0;
+    }
+
+    #game-controls select, #game-controls button {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--text-on-dark);
+      cursor: pointer;
+    }
+
+    #game-controls button {
+      background: rgba(242, 201, 76, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+      transition: background 0.2s;
+    }
+
+    #game-controls button:hover {
+      background: rgba(242, 201, 76, 0.3);
+    }
+
+    #game-stats {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      opacity: 0.6;
+      margin-top: 0.5rem;
+    }
+
+    /* ============================================
+       FILM GRAIN
+       ============================================ */
+    .grain-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.04;
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/></filter><rect width="128" height="128" filter="url(%23n)" opacity="1"/></svg>');
+      background-size: 128px 128px;
+      animation: grain 0.5s steps(4) infinite;
+    }
+
+    @keyframes grain {
+      0%, 100% { background-position: 0 0; }
+      25% { background-position: -32px -32px; }
+      50% { background-position: 64px 32px; }
+      75% { background-position: -64px 64px; }
+    }
+
+    /* ============================================
+       MOBILE TAP-TO-EXPLORE
+       ============================================ */
+    .mobile-only {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .mobile-only {
+        display: block;
+      }
+    }
+
+    #enter-explore, #exit-explore-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--accent);
+      background: rgba(242, 201, 76, 0.15);
+      color: var(--accent);
+      cursor: pointer;
+      margin: 0.5rem auto;
+      display: block;
+    }
+
+    #latent-canvas.explore-mode {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px rgba(242, 201, 76, 0.3);
+    }
+
+    /* ============================================
+       SOUVENIR (Act V)
+       ============================================ */
+    #souvenir {
+      margin-top: 3rem;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+
+    #souvenir.visible {
+      opacity: 1;
+    }
+
+    #souvenir-image {
+      width: 256px;
+      height: 256px;
+      border-radius: 10px;
+      border: 2px solid var(--decoder-primary);
+      image-rendering: pixelated;
+      box-shadow: 0 0 30px rgba(212, 132, 90, 0.2);
+    }
+
+    #souvenir .coord {
+      font-size: 0.8rem;
+      opacity: 0.6;
+      margin-top: 0.5rem;
+    }
+
+    #souvenir .label {
+      font-style: italic;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+
+    /* ============================================
        REDUCED MOTION
        ============================================ */
     @media (prefers-reduced-motion: reduce) {
@@ -668,6 +1021,9 @@
   <section data-act="1" id="act-hook">
     <h1>Sunrise Machine</h1>
     <p class="subtitle">What if two numbers could paint a sunrise?</p>
+    <div id="hero-lissajous">
+      <canvas id="hero-image" width="384" height="384"></canvas>
+    </div>
     <canvas id="grid-scatter-canvas" width="520" height="520"></canvas>
     <span class="grid-axis-label" id="gs-x-label">Time of Year &rarr;</span>
     <span class="grid-axis-label" id="gs-y-label">Time of Day &rarr;</span>
@@ -816,7 +1172,35 @@
   <!-- ACT IV: Variational -->
   <section data-act="4" id="act-variational">
     <h2>Why "Variational"?</h2>
-    <p class="placeholder-text">Temperature and beta controls coming soon...</p>
+
+    <div id="temperature-section">
+      <h3>Sampling Temperature</h3>
+      <div class="slider-row">
+        <span>T = </span>
+        <input type="range" id="temp-slider" min="0" max="3" step="0.1" value="1">
+        <span id="temp-value">1.0</span>
+      </div>
+      <div id="sample-filmstrip"></div>
+    </div>
+
+    <div id="kl-section">
+      <h3>The Balance: Reconstruction vs. Regularization</h3>
+      <div id="tug-of-war">
+        <span class="tug-label">Sharp images &larr;</span>
+        <input type="range" id="beta-slider" min="0" max="5" step="0.1" value="1">
+        <span class="tug-label">&rarr; Smooth space</span>
+      </div>
+      <div id="beta-demo">
+        <div class="beta-demo-card">
+          <canvas id="beta-latent-vis" width="128" height="128"></canvas>
+          <p>Latent distribution</p>
+        </div>
+        <div class="beta-demo-card">
+          <canvas id="beta-recon-vis" width="128" height="128"></canvas>
+          <p>Reconstruction quality</p>
+        </div>
+      </div>
+    </div>
 
     <!-- Annotation 4: Why sample from a distribution? -->
     <details class="annotation" data-depth="intuitive">
@@ -866,8 +1250,57 @@
   <!-- ACT V: Sandbox -->
   <section data-act="5" id="act-sandbox">
     <h2>Your Turn</h2>
-    <p class="placeholder-text">Game and sandbox coming soon...</p>
+
+    <div id="game-container">
+      <div id="game-target">
+        <p>Can you find this sunrise in latent space?</p>
+        <canvas id="target-image" width="128" height="128"></canvas>
+      </div>
+      <div id="game-canvas-wrapper">
+        <canvas id="game-latent-canvas" width="400" height="400"></canvas>
+        <svg id="game-overlay" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+      <div id="game-guess-preview">
+        <canvas id="guess-preview-canvas" width="96" height="96"></canvas>
+      </div>
+      <div id="game-feedback"></div>
+      <div id="game-score">
+        <div id="distance-meter"></div>
+        <span id="score-text">Score: --</span>
+        <span id="guess-count-text">Guesses: 0/3</span>
+      </div>
+      <div id="game-controls">
+        <select id="difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+        <button id="play-btn">Play</button>
+        <button id="next-btn" style="display:none">Next Round</button>
+      </div>
+      <div id="game-stats">
+        Round: <span id="round-count">0</span>/5 | Total: <span id="total-score">0</span> | Best: <span id="high-score">--</span>
+      </div>
+    </div>
+
+    <div id="souvenir">
+      <p>Your sunrise:</p>
+      <canvas id="souvenir-image" width="256" height="256"></canvas>
+      <p class="coord" id="souvenir-coord">z = (0.00, 0.00)</p>
+      <p class="label" id="souvenir-label"></p>
+    </div>
   </section>
+
+  <!-- Film grain overlay -->
+  <div class="grain-overlay"></div>
+
+  <!-- Mobile explore toggle -->
+  <div class="mobile-only" id="explore-toggle-wrap" style="text-align:center;margin:0.5rem 0;">
+    <button id="enter-explore">Tap to explore the sunrise space</button>
+  </div>
+  <div class="mobile-only" id="exit-explore-wrap" style="display:none;text-align:center;margin:0.5rem 0;">
+    <button id="exit-explore-btn">Done exploring</button>
+  </div>
 
   <!-- Loading indicator -->
   <div id="loading-indicator">Loading model...</div>
@@ -1445,6 +1878,7 @@
        ============================================ */
     latentCanvas.addEventListener('pointermove', (e) => {
       if (state.isMobile) return;
+      if (dragPin !== null) return; // Drag mode handled separately
       const [z1, z2] = screenToLatent(e.offsetX, e.offsetY);
       state.latentCursor = [z1, z2];
 
@@ -1478,10 +1912,14 @@
     /* ============================================
        CLICK-TO-PIN (Act II)
        ============================================ */
+    // Drag state for post-encoding verification
+    let dragPin = null;
+    let dragOriginalZ = null;
+
     latentCanvas.addEventListener('pointerdown', async (e) => {
       const [z1, z2] = screenToLatent(e.offsetX, e.offsetY);
 
-      // Check if clicking near existing pin (unpin)
+      // Check if clicking near existing pin
       const hitRadius = 15; // pixels in SVG space
       for (let i = 0; i < state.pinnedPoints.length; i++) {
         const pin = state.pinnedPoints[i];
@@ -1489,10 +1927,10 @@
         const [cx, cy] = latentToSVG(z1, z2);
         const dist = Math.sqrt((px - cx) ** 2 + (py - cy) ** 2);
         if (dist < hitRadius) {
-          // Remove pin
-          state.pinnedPoints.splice(i, 1);
-          updateInterpState();
-          updateSVGOverlay();
+          // Start drag for post-encoding verification
+          dragPin = i;
+          dragOriginalZ = [...pin.z];
+          latentCanvas.setPointerCapture(e.pointerId);
           return;
         }
       }
@@ -1523,6 +1961,9 @@
       updateCoordReadout(z1, z2);
       decodedPanel.classList.add('visible');
       await decodeAndRender([z1, z2]);
+
+      // Update souvenir
+      updateSouvenir(z1, z2);
     });
 
     /* ============================================
@@ -2277,6 +2718,594 @@
     }
 
     /* ============================================
+       1. HERO LISSAJOUS ANIMATION (Act I)
+       ============================================ */
+    const heroCanvas = document.getElementById('hero-image');
+    const heroCtx = heroCanvas.getContext('2d');
+    let heroAnimRunning = false;
+    let heroAnimId = null;
+    const PHI = (1 + Math.sqrt(5)) / 2;
+
+    function startHeroAnimation() {
+      if (heroAnimRunning) return;
+      if (!state.modelReady && !state.atlasLoaded) return;
+      heroAnimRunning = true;
+
+      const cycleDuration = 8000; // 8s
+      const fps = 15;
+      const interval = 1000 / fps;
+      let lastFrame = 0;
+
+      function tick(timestamp) {
+        if (!heroAnimRunning) return;
+        heroAnimId = requestAnimationFrame(tick);
+
+        if (timestamp - lastFrame < interval) return;
+        lastFrame = timestamp;
+
+        const t = (timestamp % cycleDuration) / cycleDuration * Math.PI * 2;
+        const z1 = 1.5 * Math.sin(t);
+        const z2 = 1.5 * Math.sin(t * PHI + Math.PI / 4);
+
+        decodeToCanvas(z1, z2, heroCtx, 384);
+      }
+      heroAnimId = requestAnimationFrame(tick);
+    }
+
+    function stopHeroAnimation() {
+      heroAnimRunning = false;
+      if (heroAnimId) {
+        cancelAnimationFrame(heroAnimId);
+        heroAnimId = null;
+      }
+    }
+
+    async function decodeToCanvas(z1, z2, ctx, size) {
+      if (state.modelReady && !state.useSpriteFallback) {
+        const data = await decodeTFJS(z1, z2);
+        if (data) {
+          const imgSize = 32;
+          const imgData = ctx.createImageData(imgSize, imgSize);
+          for (let i = 0; i < imgSize * imgSize; i++) {
+            imgData.data[i * 4 + 0] = Math.round(data[i * 3 + 0] * 255);
+            imgData.data[i * 4 + 1] = Math.round(data[i * 3 + 1] * 255);
+            imgData.data[i * 4 + 2] = Math.round(data[i * 3 + 2] * 255);
+            imgData.data[i * 4 + 3] = 255;
+          }
+          const tmp = document.createElement('canvas');
+          tmp.width = imgSize; tmp.height = imgSize;
+          tmp.getContext('2d').putImageData(imgData, 0, 0);
+          ctx.clearRect(0, 0, size, size);
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(tmp, 0, 0, size, size);
+          return;
+        }
+      }
+      const atlas = decodeFromAtlas(z1, z2);
+      if (atlas) {
+        ctx.clearRect(0, 0, size, size);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(atlas, 0, 0, size, size);
+      }
+    }
+
+    /* ============================================
+       2. TEMPERATURE SLIDER (Act IV)
+       ============================================ */
+    const tempSlider = document.getElementById('temp-slider');
+    const tempValue = document.getElementById('temp-value');
+    const filmstrip = document.getElementById('sample-filmstrip');
+    let filmstripCanvases = [];
+
+    function setupTemperatureSlider() {
+      filmstrip.innerHTML = '';
+      filmstripCanvases = [];
+      for (let i = 0; i < 8; i++) {
+        const c = document.createElement('canvas');
+        c.width = 64; c.height = 64;
+        filmstrip.appendChild(c);
+        filmstripCanvases.push(c);
+      }
+
+      tempSlider.addEventListener('input', () => {
+        tempValue.textContent = parseFloat(tempSlider.value).toFixed(1);
+        updateTemperatureSamples();
+      });
+
+      // Initial render
+      updateTemperatureSamples();
+    }
+
+    async function updateTemperatureSamples() {
+      const T = parseFloat(tempSlider.value);
+      // Use center or last pinned point as mu
+      let mu = [0, 0];
+      if (state.pinnedPoints.length > 0) {
+        mu = state.pinnedPoints[state.pinnedPoints.length - 1].z;
+      }
+
+      // Sample 8 z values
+      const samples = [];
+      for (let i = 0; i < 8; i++) {
+        const e1 = gaussianRand();
+        const e2 = gaussianRand();
+        samples.push([mu[0] + T * e1, mu[1] + T * e2]);
+      }
+
+      // Batch decode if model ready, else use atlas
+      if (state.modelReady && !state.useSpriteFallback) {
+        try {
+          const results = tf.tidy(() => {
+            const input = tf.tensor2d(samples);
+            const output = state.decoder.predict(input);
+            return tf.split(output, 8, 0);
+          });
+          for (let i = 0; i < 8; i++) {
+            const data = await results[i].data();
+            results[i].dispose();
+            renderToSmallCanvas(data, filmstripCanvases[i]);
+          }
+        } catch (e) {
+          // Fallback to individual atlas decodes
+          for (let i = 0; i < 8; i++) {
+            decodeToCanvas(samples[i][0], samples[i][1], filmstripCanvases[i].getContext('2d'), 64);
+          }
+        }
+      } else {
+        for (let i = 0; i < 8; i++) {
+          decodeToCanvas(samples[i][0], samples[i][1], filmstripCanvases[i].getContext('2d'), 64);
+        }
+      }
+    }
+
+    function renderToSmallCanvas(data, canvas) {
+      const size = 32;
+      const ctx = canvas.getContext('2d');
+      const imgData = ctx.createImageData(size, size);
+      for (let i = 0; i < size * size; i++) {
+        imgData.data[i * 4 + 0] = Math.round(data[i * 3 + 0] * 255);
+        imgData.data[i * 4 + 1] = Math.round(data[i * 3 + 1] * 255);
+        imgData.data[i * 4 + 2] = Math.round(data[i * 3 + 2] * 255);
+        imgData.data[i * 4 + 3] = 255;
+      }
+      const tmp = document.createElement('canvas');
+      tmp.width = size; tmp.height = size;
+      tmp.getContext('2d').putImageData(imgData, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(tmp, 0, 0, canvas.width, canvas.height);
+    }
+
+    /* ============================================
+       3. BETA / KL DIVERGENCE SLIDER (Act IV)
+       ============================================ */
+    const betaSlider = document.getElementById('beta-slider');
+    const betaLatentVis = document.getElementById('beta-latent-vis');
+    const betaReconVis = document.getElementById('beta-recon-vis');
+
+    function setupBetaSlider() {
+      betaSlider.addEventListener('input', updateBetaDemo);
+      updateBetaDemo();
+    }
+
+    function updateBetaDemo() {
+      const beta = parseFloat(betaSlider.value);
+      drawBetaLatentVis(beta);
+      drawBetaReconVis(beta);
+    }
+
+    function drawBetaLatentVis(beta) {
+      const ctx = betaLatentVis.getContext('2d');
+      const w = 128, h = 128;
+      ctx.clearRect(0, 0, w, h);
+
+      // Background
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.fillRect(0, 0, w, h);
+
+      if (!state.latentCoords) return;
+
+      // Scale factor: low beta = tight clusters (scale up); high beta = overlap (scale down toward center)
+      const spread = Math.max(0.2, 1 / (0.5 + beta * 0.3));
+      const jitter = Math.max(0, (1 - beta) * 0.4);
+
+      const scale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([10, w - 10]);
+      const ysc = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([h - 10, 10]);
+
+      // Draw subset of points
+      const step = Math.max(1, Math.floor(state.latentCoords.length / 200));
+      for (let i = 0; i < state.latentCoords.length; i += step) {
+        const pt = state.latentCoords[i];
+        let z1 = pt.z[0] * spread + (Math.random() - 0.5) * jitter;
+        let z2 = pt.z[1] * spread + (Math.random() - 0.5) * jitter;
+        // For high beta, pull toward center
+        if (beta > 1) {
+          const pullFactor = (beta - 1) * 0.15;
+          z1 = z1 * (1 - pullFactor);
+          z2 = z2 * (1 - pullFactor);
+        }
+        const cx = scale(z1);
+        const cy = ysc(z2);
+        ctx.beginPath();
+        ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+        ctx.fillStyle = beta < 1 ? 'rgba(212, 132, 90, 0.5)' : 'rgba(108, 142, 191, 0.5)';
+        ctx.fill();
+      }
+    }
+
+    async function drawBetaReconVis(beta) {
+      const ctx = betaReconVis.getContext('2d');
+      // Low beta: sharp reconstruction at a sample point
+      // High beta: blurry (simulate by averaging multiple nearby decodes)
+      const z = [0.5, 0.5]; // sample point
+
+      if (beta <= 1) {
+        // Sharp: decode at exact point
+        await decodeToCanvas(z[0], z[1], ctx, 128);
+      } else {
+        // Blurry: average multiple nearby points by blending
+        ctx.clearRect(0, 0, 128, 128);
+        const blurRadius = (beta - 1) * 0.3;
+        const samples = 4;
+        ctx.globalAlpha = 1 / samples;
+        for (let i = 0; i < samples; i++) {
+          const nz1 = z[0] + gaussianRand() * blurRadius;
+          const nz2 = z[1] + gaussianRand() * blurRadius;
+          await decodeToCanvas(nz1, nz2, ctx, 128);
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    /* ============================================
+       4. FIND THE SUNRISE GAME (Act V)
+       ============================================ */
+    const gameCanvas = document.getElementById('game-latent-canvas');
+    const gameCtx = gameCanvas.getContext('2d');
+    const gameOverlay = document.getElementById('game-overlay');
+    const targetCanvas = document.getElementById('target-image');
+    const targetCtx = targetCanvas.getContext('2d');
+    const guessPreview = document.getElementById('guess-preview-canvas');
+    const guessPreviewCtx = guessPreview.getContext('2d');
+    const playBtn = document.getElementById('play-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const difficultySelect = document.getElementById('difficulty');
+    const gameFeedback = document.getElementById('game-feedback');
+    const distanceMeter = document.getElementById('distance-meter');
+    const scoreText = document.getElementById('score-text');
+    const guessCountText = document.getElementById('guess-count-text');
+    const roundCountEl = document.getElementById('round-count');
+    const totalScoreEl = document.getElementById('total-score');
+    const highScoreEl = document.getElementById('high-score');
+
+    const gameState = {
+      active: false,
+      targetZ: null,
+      guesses: [],
+      maxGuesses: 3,
+      roundScore: 0,
+      totalScore: 0,
+      round: 0,
+      maxRounds: 5,
+      highScore: null,
+    };
+
+    // Load high score
+    try {
+      const hs = localStorage.getItem('sunriseGameHighScore');
+      if (hs) { gameState.highScore = parseInt(hs); highScoreEl.textContent = gameState.highScore; }
+    } catch (e) {}
+
+    const gameXScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([20, 380]);
+    const gameYScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([380, 20]);
+
+    function drawGameCanvas() {
+      const w = 400, h = 400;
+      gameCtx.clearRect(0, 0, w, h);
+
+      // Grid
+      gameCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      gameCtx.lineWidth = 1;
+      for (let t = -3; t <= 3; t++) {
+        const x = gameXScale(t); const y = gameYScale(t);
+        gameCtx.beginPath(); gameCtx.moveTo(x, 0); gameCtx.lineTo(x, h); gameCtx.stroke();
+        gameCtx.beginPath(); gameCtx.moveTo(0, y); gameCtx.lineTo(w, y); gameCtx.stroke();
+      }
+
+      const diff = difficultySelect.value;
+
+      // Training points (not on hard)
+      if (diff !== 'hard' && state.latentCoords) {
+        state.latentCoords.forEach(pt => {
+          const cx = gameXScale(pt.z[0]);
+          const cy = gameYScale(pt.z[1]);
+          gameCtx.beginPath();
+          gameCtx.arc(cx, cy, 1.5, 0, Math.PI * 2);
+          gameCtx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+          gameCtx.fill();
+        });
+      }
+
+      // Easy: faint halo around target
+      if (diff === 'easy' && gameState.targetZ) {
+        const tx = gameXScale(gameState.targetZ[0]);
+        const ty = gameYScale(gameState.targetZ[1]);
+        const grad = gameCtx.createRadialGradient(tx, ty, 0, tx, ty, 60);
+        grad.addColorStop(0, 'rgba(242, 201, 76, 0.12)');
+        grad.addColorStop(1, 'rgba(242, 201, 76, 0)');
+        gameCtx.fillStyle = grad;
+        gameCtx.fillRect(0, 0, w, h);
+      }
+    }
+
+    function drawGameOverlay() {
+      const ns = 'http://www.w3.org/2000/svg';
+      gameOverlay.innerHTML = '';
+      const diff = difficultySelect.value;
+
+      // Axis labels (not on hard)
+      if (diff !== 'hard') {
+        const xLabel = document.createElementNS(ns, 'text');
+        xLabel.setAttribute('x', 200); xLabel.setAttribute('y', 395);
+        xLabel.setAttribute('text-anchor', 'middle'); xLabel.setAttribute('fill', 'rgba(255,255,255,0.4)');
+        xLabel.setAttribute('font-size', '10'); xLabel.textContent = 'z\u2081';
+        gameOverlay.appendChild(xLabel);
+
+        const yLabel = document.createElementNS(ns, 'text');
+        yLabel.setAttribute('x', 8); yLabel.setAttribute('y', 200);
+        yLabel.setAttribute('text-anchor', 'middle'); yLabel.setAttribute('fill', 'rgba(255,255,255,0.4)');
+        yLabel.setAttribute('font-size', '10'); yLabel.setAttribute('transform', 'rotate(-90, 8, 200)');
+        yLabel.textContent = 'z\u2082';
+        gameOverlay.appendChild(yLabel);
+      }
+
+      // Draw guess pins
+      gameState.guesses.forEach((g, i) => {
+        const gx = gameXScale(g.z[0]);
+        const gy = gameYScale(g.z[1]);
+        const circle = document.createElementNS(ns, 'circle');
+        Object.entries({ cx: gx, cy: gy, r: 6, fill: g.score > 80 ? '#4CAF50' : g.score > 50 ? '#FFC107' : '#f44336', stroke: '#fff', 'stroke-width': 2 }).forEach(([k, v]) => circle.setAttribute(k, v));
+        gameOverlay.appendChild(circle);
+
+        const label = document.createElementNS(ns, 'text');
+        label.setAttribute('x', gx + 10); label.setAttribute('y', gy - 8);
+        label.setAttribute('fill', '#fff'); label.setAttribute('font-size', '11');
+        label.setAttribute('font-family', 'JetBrains Mono, monospace');
+        label.textContent = (i + 1).toString();
+        gameOverlay.appendChild(label);
+      });
+    }
+
+    function startGame() {
+      gameState.active = true;
+      gameState.guesses = [];
+      gameState.round++;
+      gameState.roundScore = 0;
+      roundCountEl.textContent = gameState.round;
+      guessCountText.textContent = 'Guesses: 0/' + gameState.maxGuesses;
+      scoreText.textContent = 'Score: --';
+      gameFeedback.textContent = '';
+      distanceMeter.style.setProperty('--meter-pct', 0);
+      distanceMeter.style.setProperty('--meter-color', '#333');
+      nextBtn.style.display = 'none';
+      playBtn.style.display = 'none';
+
+      // Generate random target within 2-sigma
+      const z1 = gaussianRand() * 1.5;
+      const z2 = gaussianRand() * 1.5;
+      gameState.targetZ = [Math.max(-2.5, Math.min(2.5, z1)), Math.max(-2.5, Math.min(2.5, z2))];
+
+      // Decode target
+      decodeToCanvas(gameState.targetZ[0], gameState.targetZ[1], targetCtx, 128);
+
+      drawGameCanvas();
+      drawGameOverlay();
+    }
+
+    function handleGameClick(e) {
+      if (!gameState.active) return;
+      if (gameState.guesses.length >= gameState.maxGuesses) return;
+
+      const rect = gameCanvas.getBoundingClientRect();
+      const px = (e.offsetX / rect.width) * 400;
+      const py = (e.offsetY / rect.height) * 400;
+      const gz1 = gameXScale.invert(px);
+      const gz2 = gameYScale.invert(py);
+
+      // Score
+      const dist = Math.sqrt((gz1 - gameState.targetZ[0]) ** 2 + (gz2 - gameState.targetZ[1]) ** 2);
+      const score = Math.max(0, Math.round(100 - dist * 33));
+
+      gameState.guesses.push({ z: [gz1, gz2], score });
+      gameState.roundScore = Math.max(gameState.roundScore, score);
+
+      // Update UI
+      guessCountText.textContent = `Guesses: ${gameState.guesses.length}/${gameState.maxGuesses}`;
+      scoreText.textContent = `Score: ${score}`;
+
+      // Meter
+      const pct = score;
+      const meterColor = score > 80 ? '#4CAF50' : score > 50 ? '#FFC107' : '#f44336';
+      distanceMeter.style.setProperty('--meter-pct', pct);
+      distanceMeter.style.setProperty('--meter-color', meterColor);
+
+      // Feedback
+      if (score > 80) gameFeedback.textContent = 'Almost perfect!';
+      else if (score >= 50) gameFeedback.textContent = 'Getting close. Look at the sky color.';
+      else gameFeedback.textContent = 'Try a different region.';
+
+      // Decode guess
+      decodeToCanvas(gz1, gz2, guessPreviewCtx, 96);
+
+      // Update souvenir
+      updateSouvenir(gz1, gz2);
+
+      drawGameOverlay();
+
+      // Check if done
+      if (gameState.guesses.length >= gameState.maxGuesses) {
+        endRound();
+      }
+    }
+
+    function endRound() {
+      gameState.active = false;
+      gameState.totalScore += gameState.roundScore;
+      totalScoreEl.textContent = gameState.totalScore;
+
+      // Reveal target with bullseye animation
+      const ns = 'http://www.w3.org/2000/svg';
+      const tx = gameXScale(gameState.targetZ[0]);
+      const ty = gameYScale(gameState.targetZ[1]);
+
+      // Bullseye circles
+      [20, 14, 8].forEach((r, i) => {
+        const circle = document.createElementNS(ns, 'circle');
+        Object.entries({ cx: tx, cy: ty, r: 0, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 1.5, opacity: 1 - i * 0.3 }).forEach(([k, v]) => circle.setAttribute(k, v));
+        gameOverlay.appendChild(circle);
+        // Animate radius
+        setTimeout(() => circle.setAttribute('r', r), i * 100);
+      });
+
+      // Target pin
+      const pin = document.createElementNS(ns, 'circle');
+      Object.entries({ cx: tx, cy: ty, r: 5, fill: 'var(--accent)', stroke: '#fff', 'stroke-width': 2 }).forEach(([k, v]) => pin.setAttribute(k, v));
+      gameOverlay.appendChild(pin);
+
+      // Line from closest guess to target
+      let closest = gameState.guesses[0];
+      let closestDist = Infinity;
+      gameState.guesses.forEach(g => {
+        const d = Math.sqrt((g.z[0] - gameState.targetZ[0]) ** 2 + (g.z[1] - gameState.targetZ[1]) ** 2);
+        if (d < closestDist) { closestDist = d; closest = g; }
+      });
+      const line = document.createElementNS(ns, 'line');
+      const cgx = gameXScale(closest.z[0]);
+      const cgy = gameYScale(closest.z[1]);
+      Object.entries({ x1: cgx, y1: cgy, x2: tx, y2: ty, stroke: 'var(--accent)', 'stroke-width': 1, 'stroke-dasharray': '4,3', opacity: 0.7 }).forEach(([k, v]) => line.setAttribute(k, v));
+      gameOverlay.appendChild(line);
+
+      if (gameState.round >= gameState.maxRounds) {
+        // Session over
+        gameFeedback.textContent = `Session complete! Total: ${gameState.totalScore}`;
+        if (!gameState.highScore || gameState.totalScore > gameState.highScore) {
+          gameState.highScore = gameState.totalScore;
+          highScoreEl.textContent = gameState.highScore;
+          try { localStorage.setItem('sunriseGameHighScore', gameState.highScore); } catch (e) {}
+          gameFeedback.textContent += ' New high score!';
+        }
+        playBtn.textContent = 'Play Again';
+        playBtn.style.display = '';
+        gameState.round = 0;
+        gameState.totalScore = 0;
+      } else {
+        nextBtn.style.display = '';
+      }
+    }
+
+    gameCanvas.addEventListener('pointerdown', handleGameClick);
+    playBtn.addEventListener('click', startGame);
+    nextBtn.addEventListener('click', startGame);
+
+    /* ============================================
+       5. POST-ENCODING DRAG VERIFICATION (Act III)
+       ============================================ */
+    // dragPin and dragOriginalZ are declared near the pointerdown handler above
+
+    latentCanvas.addEventListener('pointermove', async (e) => {
+      if (dragPin === null) return;
+      const [z1, z2] = screenToLatent(e.offsetX, e.offsetY);
+      state.pinnedPoints[dragPin].z = [z1, z2];
+      updateCoordReadout(z1, z2);
+      await decodeAndRender([z1, z2]);
+      updateSVGOverlayWithGhost(dragOriginalZ);
+    });
+
+    latentCanvas.addEventListener('pointerup', () => {
+      if (dragPin !== null) {
+        // Snap back to original
+        state.pinnedPoints[dragPin].z = [...dragOriginalZ];
+        dragPin = null;
+        dragOriginalZ = null;
+        updateSVGOverlay();
+      }
+    });
+
+    function updateSVGOverlayWithGhost(ghostZ) {
+      updateSVGOverlay();
+      if (!ghostZ) return;
+      const ns = 'http://www.w3.org/2000/svg';
+      const g = canvasOverlay.querySelector('#dynamic-overlay');
+      if (!g) return;
+
+      const [gx, gy] = latentToSVG(ghostZ[0], ghostZ[1]);
+      const ghostCircle = document.createElementNS(ns, 'circle');
+      Object.entries({ cx: gx, cy: gy, r: 10, fill: 'none', stroke: 'rgba(108, 142, 191, 0.4)', 'stroke-width': 1.5, 'stroke-dasharray': '4,3' }).forEach(([k, v]) => ghostCircle.setAttribute(k, v));
+      g.appendChild(ghostCircle);
+
+      if (dragPin !== null && state.pinnedPoints[dragPin]) {
+        const [px, py] = latentToSVG(state.pinnedPoints[dragPin].z[0], state.pinnedPoints[dragPin].z[1]);
+        const line = document.createElementNS(ns, 'line');
+        Object.entries({ x1: gx, y1: gy, x2: px, y2: py, stroke: 'rgba(108, 142, 191, 0.3)', 'stroke-width': 0.75 }).forEach(([k, v]) => line.setAttribute(k, v));
+        g.appendChild(line);
+      }
+    }
+
+    /* ============================================
+       6. MOBILE TAP-TO-EXPLORE
+       ============================================ */
+    const enterExploreBtn = document.getElementById('enter-explore');
+    const exitExploreWrap = document.getElementById('exit-explore-wrap');
+    const exploreToggleWrap = document.getElementById('explore-toggle-wrap');
+    const exitExploreBtn = document.getElementById('exit-explore-btn');
+
+    if (enterExploreBtn) {
+      enterExploreBtn.addEventListener('click', () => {
+        latentCanvas.style.touchAction = 'none';
+        latentCanvas.classList.add('explore-mode');
+        exploreToggleWrap.style.display = 'none';
+        exitExploreWrap.style.display = '';
+        state.isMobile = false; // Allow decode on touch
+      });
+    }
+
+    if (exitExploreBtn) {
+      exitExploreBtn.addEventListener('click', () => {
+        latentCanvas.style.touchAction = 'pan-y';
+        latentCanvas.classList.remove('explore-mode');
+        exploreToggleWrap.style.display = '';
+        exitExploreWrap.style.display = 'none';
+        state.isMobile = true;
+      });
+    }
+
+    /* ============================================
+       7. SOUVENIR (Act V)
+       ============================================ */
+    const souvenirDiv = document.getElementById('souvenir');
+    const souvenirCanvas = document.getElementById('souvenir-image');
+    const souvenirCoord = document.getElementById('souvenir-coord');
+    const souvenirLabel = document.getElementById('souvenir-label');
+
+    function updateSouvenir(z1, z2) {
+      decodeToCanvas(z1, z2, souvenirCanvas.getContext('2d'), 256);
+      souvenirCoord.textContent = `z = (${z1.toFixed(2)}, ${z2.toFixed(2)})`;
+
+      // Map z1 to season, z2 to time-of-day
+      const seasons = ['Deep winter', 'Late winter', 'Early spring', 'Spring', 'Late spring', 'Early summer', 'Summer', 'Late summer', 'Early autumn', 'Autumn', 'Late autumn', 'Early winter'];
+      const times = ['Pre-dawn', 'Dawn', 'Early morning', 'Morning', 'Late morning', 'Midday'];
+      const si = Math.max(0, Math.min(seasons.length - 1, Math.round((z1 + 3) / 6 * (seasons.length - 1))));
+      const ti = Math.max(0, Math.min(times.length - 1, Math.round((z2 + 3) / 6 * (times.length - 1))));
+      souvenirLabel.textContent = `${times[ti]}, ${seasons[si].toLowerCase()}`;
+
+      souvenirDiv.classList.add('visible');
+    }
+
+    // Also update souvenir on Act II decodes
+    const originalDecodeAndRender = decodeAndRender;
+    // We patch via the hover handler - souvenir updates on click/pin already handled
+
+    /* ============================================
        INIT
        ============================================ */
     async function init() {
@@ -2303,6 +3332,26 @@
       setupAnnotations();
       const encoderSection = document.getElementById('act-encoder');
       if (encoderSection) encoderObserver.observe(encoderSection);
+
+      // Start hero animation
+      startHeroAnimation();
+
+      // Hero animation: stop on scroll past Act I, resume on scroll back
+      ScrollTrigger.create({
+        trigger: '#act-hook',
+        start: 'top top',
+        end: 'bottom top',
+        onLeave: stopHeroAnimation,
+        onEnterBack: startHeroAnimation,
+      });
+
+      // Setup Act IV controls
+      setupTemperatureSlider();
+      setupBetaSlider();
+
+      // Draw initial game canvas
+      drawGameCanvas();
+      drawGameOverlay();
 
       if (!state.modelReady && !state.atlasLoaded) {
         updateLoadingStatus('Assets not found \u2014 place model & atlas in web/assets/');
