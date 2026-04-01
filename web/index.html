@@ -318,8 +318,15 @@
       display: none;
     }
 
-    /* Acts III, IV, V: placeholder styling */
-    section[data-act="3"],
+    /* Acts III, IV, V styling */
+    section[data-act="3"] {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 10vh;
+    }
+
     section[data-act="4"],
     section[data-act="5"] {
       min-height: 100vh;
@@ -339,6 +346,231 @@
       font-size: 1rem;
       opacity: 0.5;
       font-style: italic;
+    }
+
+    /* ============================================
+       ENCODER GALLERY (Act III)
+       ============================================ */
+    #encoder-gallery {
+      text-align: center;
+      margin-bottom: 2rem;
+      max-width: 700px;
+    }
+
+    #encoder-gallery p {
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    .gallery-strip {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .gallery-thumb {
+      width: 64px;
+      height: 64px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      image-rendering: pixelated;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+      background: rgba(0,0,0,0.3);
+    }
+
+    .gallery-thumb:hover {
+      box-shadow: 0 0 12px rgba(255, 200, 120, 0.4);
+      transform: scale(1.08);
+    }
+
+    .gallery-thumb.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 16px rgba(242, 201, 76, 0.5);
+    }
+
+    /* Encoder source + animation area */
+    .encoder-stage {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .encoder-source-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    #encoder-source-img {
+      width: 128px;
+      height: 128px;
+      border-radius: 8px;
+      border: 2px solid var(--encoder-primary);
+      image-rendering: pixelated;
+      background: rgba(0,0,0,0.3);
+      transition: opacity 0.3s;
+    }
+
+    #encoder-trigger-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--encoder-primary);
+      background: rgba(108, 142, 191, 0.15);
+      color: var(--encoder-primary);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    #encoder-trigger-btn:hover {
+      background: var(--encoder-primary);
+      color: #fff;
+    }
+
+    /* Encoder animation canvas */
+    #encoder-anim-canvas {
+      border-radius: 8px;
+      background: rgba(0,0,0,0.2);
+    }
+
+    /* Post-animation comparison */
+    .encoder-result {
+      display: none;
+      gap: 1.5rem;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .encoder-result.visible {
+      display: flex;
+    }
+
+    .encoder-result-card {
+      text-align: center;
+    }
+
+    .encoder-result-card canvas {
+      width: 128px;
+      height: 128px;
+      border-radius: 8px;
+      image-rendering: pixelated;
+    }
+
+    .encoder-result-card p {
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      opacity: 0.7;
+    }
+
+    #encoder-result-original {
+      border: 2px solid var(--encoder-primary);
+    }
+
+    #encoder-result-recon {
+      border: 2px solid var(--decoder-primary);
+    }
+
+    .encoder-result-arrow {
+      font-size: 1.5rem;
+      opacity: 0.5;
+    }
+
+    /* ============================================
+       PROGRESSIVE DISCLOSURE ANNOTATIONS
+       ============================================ */
+    .annotation {
+      margin: 1.25em 0;
+      border-left: 3px solid var(--encoder-primary);
+      padding-left: 1em;
+      text-align: left;
+      max-width: 50ch;
+    }
+
+    .annotation summary {
+      cursor: pointer;
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 0.95rem;
+      list-style: none;
+    }
+
+    .annotation summary::-webkit-details-marker { display: none; }
+
+    .annotation-content {
+      margin-top: 0.5em;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    .annotation-content p {
+      margin-bottom: 0.75em;
+    }
+
+    .annotation.deep {
+      border-left-style: dashed;
+      opacity: 0.8;
+    }
+
+    .math-block {
+      margin: 0.75em 0;
+      padding: 0.5em;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+
+    .math-inline {
+      display: inline;
+    }
+
+    /* Color-coded ELBO terms */
+    .term-recon { color: var(--decoder-primary); }
+    .term-kl { color: var(--encoder-primary); }
+
+    /* ============================================
+       DEPTH TOGGLE
+       ============================================ */
+    #depth-toggle {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 100;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.4rem 0.75rem;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(0,0,0,0.4);
+      color: rgba(255,255,255,0.7);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    #depth-toggle:hover {
+      background: rgba(0,0,0,0.6);
+      border-color: rgba(255,255,255,0.4);
+    }
+
+    #depth-toggle.active {
+      background: rgba(108, 142, 191, 0.25);
+      border-color: var(--encoder-primary);
+      color: var(--encoder-primary);
+    }
+
+    body.show-all-math .annotation:not([open]) {
+      /* force open via JS, CSS just adds visual cue */
     }
 
     /* ============================================
@@ -418,6 +650,11 @@
 </head>
 <body>
 
+  <!-- Depth toggle -->
+  <button id="depth-toggle" title="Show/hide all math annotations">
+    <span class="toggle-label">Show math</span>
+  </button>
+
   <!-- Progress dots -->
   <header>
     <div class="progress-dot active" data-target="1" title="Act I"></div>
@@ -434,6 +671,26 @@
     <canvas id="grid-scatter-canvas" width="520" height="520"></canvas>
     <span class="grid-axis-label" id="gs-x-label">Time of Year &rarr;</span>
     <span class="grid-axis-label" id="gs-y-label">Time of Day &rarr;</span>
+
+    <!-- Annotation 1: What is latent space? -->
+    <details class="annotation" data-depth="intuitive">
+      <summary>What is latent space? &#9656;</summary>
+      <div class="annotation-content">
+        <p>A map where similar sunrises live near each other. Move a little to the right and the sunrise gets warmer; move up and it gets brighter.</p>
+        <details class="annotation" data-depth="technical">
+          <summary>Technical: formal definition &#9656;</summary>
+          <div class="annotation-content">
+            <p>The <em>latent space</em> is a low-dimensional manifold <span class="math-inline" data-katex="\mathbf{z} \in \mathbb{R}^2"></span> learned by the VAE. Each point represents a compressed description of an image. The decoder maps this back: <span class="math-inline" data-katex="p_\theta(\mathbf{x}|\mathbf{z})"></span>.</p>
+            <details class="annotation deep" data-depth="deep">
+              <summary>Deep dive: comparison to PCA, t-SNE, UMAP &#9656;</summary>
+              <div class="annotation-content">
+                <p>Unlike PCA (linear), the VAE learns a <em>nonlinear</em> mapping with a probabilistic prior. Unlike t-SNE and UMAP (which only embed, don't decode), the VAE can generate new images from any point in latent space. The trade-off: VAE embeddings may be less visually separated than t-SNE but support generation and interpolation.</p>
+              </div>
+            </details>
+          </div>
+        </details>
+      </div>
+    </details>
   </section>
 
   <!-- ACT II: Decoder -->
@@ -458,6 +715,26 @@
           <strong>Hover over the canvas</strong> to decode sunrises in real time.
           <strong>Click</strong> to pin up to 4 favorites. Pin two to interpolate between them.
         </p>
+
+        <!-- Annotation 2: What is a decoder? -->
+        <details class="annotation" data-depth="intuitive">
+          <summary>What is a decoder? &#9656;</summary>
+          <div class="annotation-content">
+            <p>A painter that only needs two instructions. Give it two numbers and it produces a full sunrise image.</p>
+            <details class="annotation" data-depth="technical">
+              <summary>Technical: the generative model &#9656;</summary>
+              <div class="annotation-content">
+                <p>The decoder is <span class="math-inline" data-katex="p_\theta(\mathbf{x}|\mathbf{z})"></span>, a neural network that maps a latent vector <span class="math-inline" data-katex="\mathbf{z} \in \mathbb{R}^2"></span> to an image <span class="math-inline" data-katex="\mathbf{x} \in [0,1]^{32 \times 32 \times 3}"></span>. The final layer uses a Sigmoid activation to keep pixel values in [0, 1].</p>
+                <details class="annotation deep" data-depth="deep">
+                  <summary>Deep dive: architecture &#9656;</summary>
+                  <div class="annotation-content">
+                    <p>The decoder uses transposed convolutions (sometimes called "deconvolutions") to progressively upsample from a small spatial representation. Starting from the 2D latent code, a linear layer maps to a 128-channel 4&times;4 feature map, then three ConvTranspose2d layers upsample to 32&times;32. Each layer has a receptive field that grows with depth, allowing the network to capture both local texture and global structure.</p>
+                  </div>
+                </details>
+              </div>
+            </details>
+          </div>
+        </details>
       </div>
       <div class="canvas-column">
         <div class="canvas-wrap">
@@ -486,13 +763,104 @@
   <!-- ACT III: Encoder -->
   <section data-act="3" id="act-encoder">
     <h2>The Encoder</h2>
-    <p class="placeholder-text">Encoder experience coming soon...</p>
+
+    <div id="encoder-gallery">
+      <p>Pick a sunrise to see how it gets compressed to two numbers:</p>
+      <div class="gallery-strip" id="gallery-strip">
+        <!-- Thumbnails populated by JS -->
+      </div>
+    </div>
+
+    <div class="encoder-stage">
+      <div class="encoder-source-panel">
+        <canvas id="encoder-source-img" width="128" height="128"></canvas>
+        <button id="encoder-trigger-btn">Watch it encode &rarr;</button>
+      </div>
+      <canvas id="encoder-anim-canvas" width="500" height="500"></canvas>
+    </div>
+
+    <div class="encoder-result" id="encoder-result">
+      <div class="encoder-result-card">
+        <canvas id="encoder-result-original" width="128" height="128"></canvas>
+        <p>Original</p>
+      </div>
+      <span class="encoder-result-arrow">&rarr;</span>
+      <div class="encoder-result-card">
+        <canvas id="encoder-result-recon" width="128" height="128"></canvas>
+        <p>Reconstruction</p>
+      </div>
+    </div>
+
+    <!-- Annotation 3: What is an encoder? -->
+    <details class="annotation" data-depth="intuitive">
+      <summary>What is an encoder? &#9656;</summary>
+      <div class="annotation-content">
+        <p>A compressor that finds the two most important numbers to describe any sunrise.</p>
+        <details class="annotation" data-depth="technical">
+          <summary>Technical: amortized inference &#9656;</summary>
+          <div class="annotation-content">
+            <p>The encoder is a neural network <span class="math-inline" data-katex="q_\phi(\mathbf{z}|\mathbf{x})"></span> that maps an input image to a distribution in latent space. It outputs two vectors: a mean <span class="math-inline" data-katex="\boldsymbol{\mu}"></span> and a log-variance <span class="math-inline" data-katex="\log \boldsymbol{\sigma}^2"></span>.</p>
+            <div class="math-block" data-katex="q_\phi(\mathbf{z}|\mathbf{x}) = \mathcal{N}(\mathbf{z};\, \boldsymbol{\mu}_\phi(\mathbf{x}),\, \text{diag}(\boldsymbol{\sigma}^2_\phi(\mathbf{x})))"></div>
+            <details class="annotation deep" data-depth="deep">
+              <summary>Deep dive: why amortized? &#9656;</summary>
+              <div class="annotation-content">
+                <p>Instead of optimizing a separate latent code for each image (as in classical variational inference), the encoder <em>amortizes</em> the cost by learning a single function that maps any image to its approximate posterior. This is what makes VAEs fast at test time &mdash; one forward pass instead of an optimization loop.</p>
+              </div>
+            </details>
+          </div>
+        </details>
+      </div>
+    </details>
   </section>
 
   <!-- ACT IV: Variational -->
   <section data-act="4" id="act-variational">
     <h2>Why "Variational"?</h2>
     <p class="placeholder-text">Temperature and beta controls coming soon...</p>
+
+    <!-- Annotation 4: Why sample from a distribution? -->
+    <details class="annotation" data-depth="intuitive">
+      <summary>Why sample from a distribution? &#9656;</summary>
+      <div class="annotation-content">
+        <p>Allowing a little randomness makes the generator more creative. Instead of mapping each image to a single point, the encoder maps it to a small cloud &mdash; and we sample from that cloud.</p>
+        <details class="annotation" data-depth="technical">
+          <summary>Technical: the reparameterization trick &#9656;</summary>
+          <div class="annotation-content">
+            <p>We sample using:</p>
+            <div class="math-block" data-katex="\mathbf{z} = \boldsymbol{\mu} + \boldsymbol{\sigma} \odot \boldsymbol{\varepsilon}, \quad \boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})"></div>
+            <p>This lets gradients flow through the sampling step, since the randomness is isolated in <span class="math-inline" data-katex="\boldsymbol{\varepsilon}"></span>.</p>
+            <details class="annotation deep" data-depth="deep">
+              <summary>Deep dive: why is this needed for backprop? &#9656;</summary>
+              <div class="annotation-content">
+                <p>Backpropagation requires differentiable operations. Sampling from a distribution is inherently stochastic and non-differentiable. The reparameterization trick rewrites the sample as a deterministic function of the parameters plus external noise, making the loss differentiable with respect to <span class="math-inline" data-katex="\boldsymbol{\mu}"></span> and <span class="math-inline" data-katex="\boldsymbol{\sigma}"></span>.</p>
+              </div>
+            </details>
+          </div>
+        </details>
+      </div>
+    </details>
+
+    <!-- Annotation 5: What is KL divergence? -->
+    <details class="annotation" data-depth="intuitive">
+      <summary>What is KL divergence? &#9656;</summary>
+      <div class="annotation-content">
+        <p>A measure of how far the encoder's guesses are from a simple baseline (a standard normal distribution). The smaller the KL, the more "regular" the latent space.</p>
+        <details class="annotation" data-depth="technical">
+          <summary>Technical: the ELBO &#9656;</summary>
+          <div class="annotation-content">
+            <p>The VAE optimizes the Evidence Lower Bound:</p>
+            <div class="math-block" data-katex="\mathcal{L} = \underbrace{\mathbb{E}_{q(\mathbf{z}|\mathbf{x})}[\log p_\theta(\mathbf{x}|\mathbf{z})]}_{\color{#D4845A}{\text{reconstruction}}} - \beta \cdot \underbrace{D_{\text{KL}}(q_\phi(\mathbf{z}|\mathbf{x})\,\|\,p(\mathbf{z}))}_{\color{#6C8EBF}{\text{regularization}}}"></div>
+            <p>The <span class="term-recon">reconstruction term</span> wants accurate decoding. The <span class="term-kl">KL term</span> wants the encoder to stay close to the prior.</p>
+            <details class="annotation deep" data-depth="deep">
+              <summary>Deep dive: bits-back coding &#9656;</summary>
+              <div class="annotation-content">
+                <p>Information-theoretically, the ELBO can be interpreted via bits-back coding: encoding an image costs log p(x|z) bits, but we "get back" KL(q||p) bits because the decoder expects samples from the prior. The gap between the ELBO and the true log-likelihood is the KL divergence between the approximate and true posterior.</p>
+              </div>
+            </details>
+          </div>
+        </details>
+      </div>
+    </details>
   </section>
 
   <!-- ACT V: Sandbox -->
@@ -1360,6 +1728,468 @@
     }
 
     /* ============================================
+       ENCODER GALLERY & PARTICLE ANIMATION (Act III)
+       ============================================ */
+    // Curated gallery indices — pick diverse sunrises across the parameter space
+    const GALLERY_INDICES = [0, 250, 500, 750, 1000, 1250, 1500, 1750, 100, 600, 1100, 1600];
+
+    const encoderSourceCanvas = document.getElementById('encoder-source-img');
+    const encoderSourceCtx = encoderSourceCanvas.getContext('2d');
+    const encoderAnimCanvas = document.getElementById('encoder-anim-canvas');
+    const encoderAnimCtx = encoderAnimCanvas.getContext('2d');
+    const encoderTriggerBtn = document.getElementById('encoder-trigger-btn');
+    const encoderResult = document.getElementById('encoder-result');
+    const encoderResultOriginal = document.getElementById('encoder-result-original');
+    const encoderResultRecon = document.getElementById('encoder-result-recon');
+    const galleryStrip = document.getElementById('gallery-strip');
+
+    let selectedGalleryIdx = null;
+    let encoderAnimRunning = false;
+
+    function setupEncoderGallery() {
+      if (!state.latentCoords || !state.thumbnailsLoaded) return;
+      galleryStrip.innerHTML = '';
+
+      GALLERY_INDICES.forEach((dataIdx, i) => {
+        if (dataIdx >= state.latentCoords.length) return;
+        const pt = state.latentCoords[dataIdx];
+        const thumbIdx = pt.thumb_idx;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        canvas.className = 'gallery-thumb';
+        canvas.dataset.dataIdx = dataIdx;
+
+        const ctx = canvas.getContext('2d');
+        const sx = (thumbIdx % CONFIG.THUMB_COLS) * CONFIG.THUMB_SIZE;
+        const sy = Math.floor(thumbIdx / CONFIG.THUMB_COLS) * CONFIG.THUMB_SIZE;
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(state.thumbnailsImage, sx, sy, CONFIG.THUMB_SIZE, CONFIG.THUMB_SIZE, 0, 0, 64, 64);
+
+        canvas.addEventListener('click', () => selectGalleryImage(dataIdx));
+        galleryStrip.appendChild(canvas);
+      });
+
+      // Auto-select first
+      selectGalleryImage(GALLERY_INDICES[0]);
+    }
+
+    function selectGalleryImage(dataIdx) {
+      selectedGalleryIdx = dataIdx;
+      // Highlight selection
+      galleryStrip.querySelectorAll('.gallery-thumb').forEach(c => {
+        c.classList.toggle('selected', parseInt(c.dataset.dataIdx) === dataIdx);
+      });
+
+      // Draw enlarged source image
+      const pt = state.latentCoords[dataIdx];
+      const thumbIdx = pt.thumb_idx;
+      const sx = (thumbIdx % CONFIG.THUMB_COLS) * CONFIG.THUMB_SIZE;
+      const sy = Math.floor(thumbIdx / CONFIG.THUMB_COLS) * CONFIG.THUMB_SIZE;
+      encoderSourceCtx.clearRect(0, 0, 128, 128);
+      encoderSourceCtx.imageSmoothingEnabled = false;
+      encoderSourceCtx.drawImage(state.thumbnailsImage, sx, sy, CONFIG.THUMB_SIZE, CONFIG.THUMB_SIZE, 0, 0, 128, 128);
+
+      // Reset result area
+      encoderResult.classList.remove('visible');
+    }
+
+    // Utility functions for particle animation
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function quadraticBezier(p0, cp, p1, t) {
+      const u = 1 - t;
+      return {
+        x: u * u * p0.x + 2 * u * t * cp.x + t * t * p1.x,
+        y: u * u * p0.y + 2 * u * t * cp.y + t * t * p1.y,
+      };
+    }
+
+    function gaussianRand() {
+      // Box-Muller transform
+      let u = 0, v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+
+    function samplePixelsFromThumb(dataIdx, count) {
+      const pt = state.latentCoords[dataIdx];
+      const thumbIdx = pt.thumb_idx;
+      const sx = (thumbIdx % CONFIG.THUMB_COLS) * CONFIG.THUMB_SIZE;
+      const sy = Math.floor(thumbIdx / CONFIG.THUMB_COLS) * CONFIG.THUMB_SIZE;
+
+      // Draw thumb to offscreen canvas to sample pixels
+      const tmp = document.createElement('canvas');
+      tmp.width = CONFIG.THUMB_SIZE;
+      tmp.height = CONFIG.THUMB_SIZE;
+      const tctx = tmp.getContext('2d');
+      tctx.drawImage(state.thumbnailsImage, sx, sy, CONFIG.THUMB_SIZE, CONFIG.THUMB_SIZE, 0, 0, CONFIG.THUMB_SIZE, CONFIG.THUMB_SIZE);
+      const imgData = tctx.getImageData(0, 0, CONFIG.THUMB_SIZE, CONFIG.THUMB_SIZE);
+
+      const particles = [];
+      // Source image region on the animation canvas: top-left area, 128x128
+      const srcOffX = 20;
+      const srcOffY = 20;
+      const srcScale = 128 / CONFIG.THUMB_SIZE; // 4x
+
+      for (let i = 0; i < count; i++) {
+        const px = Math.floor(Math.random() * CONFIG.THUMB_SIZE);
+        const py = Math.floor(Math.random() * CONFIG.THUMB_SIZE);
+        const idx = (py * CONFIG.THUMB_SIZE + px) * 4;
+        const r = imgData.data[idx];
+        const g = imgData.data[idx + 1];
+        const b = imgData.data[idx + 2];
+
+        // Weight toward brighter pixels: resample if too dark
+        const brightness = (r + g + b) / 3;
+        if (brightness < 30 && Math.random() > 0.3) {
+          i--;
+          continue;
+        }
+
+        const startX = srcOffX + px * srcScale + Math.random() * srcScale;
+        const startY = srcOffY + py * srcScale + Math.random() * srcScale;
+
+        particles.push({
+          startX, startY,
+          x: startX,
+          y: startY,
+          color: `rgb(${r},${g},${b})`,
+          colorRgb: { r, g, b },
+          delay: Math.random() * 100, // 0-100ms stagger
+        });
+      }
+
+      return particles;
+    }
+
+    function runEncoderAnimation(dataIdx) {
+      if (encoderAnimRunning) return;
+      encoderAnimRunning = true;
+
+      const pt = state.latentCoords[dataIdx];
+      const targetZ = pt.z;
+
+      // Animation canvas: the target point in canvas coordinates
+      const animW = encoderAnimCanvas.width;
+      const animH = encoderAnimCanvas.height;
+      const animXScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([50, animW - 20]);
+      const animYScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([animH - 20, 50]);
+      const targetScreen = {
+        x: animXScale(targetZ[0]),
+        y: animYScale(targetZ[1]),
+      };
+
+      const particles = samplePixelsFromThumb(dataIdx, 200);
+
+      // Compute bezier control points for each particle
+      particles.forEach(p => {
+        p.start = { x: p.startX, y: p.startY };
+        const mid = { x: (p.startX + targetScreen.x) / 2, y: (p.startY + targetScreen.y) / 2 };
+        const dx = targetScreen.x - p.startX;
+        const dy = targetScreen.y - p.startY;
+        const perpX = -dy;
+        const perpY = dx;
+        const len = Math.sqrt(perpX * perpX + perpY * perpY) || 1;
+        const offset = (Math.random() - 0.5) * 100;
+        p.control = {
+          x: mid.x + (perpX / len) * offset,
+          y: mid.y + (perpY / len) * offset,
+        };
+      });
+
+      // Draw background: faint latent space dots
+      function drawAnimBackground() {
+        encoderAnimCtx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+        encoderAnimCtx.fillRect(0, 0, animW, animH);
+
+        // Draw training points faintly
+        if (state.latentCoords) {
+          encoderAnimCtx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+          state.latentCoords.forEach(coord => {
+            const cx = animXScale(coord.z[0]);
+            const cy = animYScale(coord.z[1]);
+            encoderAnimCtx.beginPath();
+            encoderAnimCtx.arc(cx, cy, 1.5, 0, Math.PI * 2);
+            encoderAnimCtx.fill();
+          });
+        }
+      }
+
+      // Draw source image faintly on anim canvas
+      function drawSourceGhost(opacity) {
+        const thumbIdx = pt.thumb_idx;
+        const sx = (thumbIdx % CONFIG.THUMB_COLS) * CONFIG.THUMB_SIZE;
+        const sy = Math.floor(thumbIdx / CONFIG.THUMB_COLS) * CONFIG.THUMB_SIZE;
+        encoderAnimCtx.globalAlpha = opacity;
+        encoderAnimCtx.imageSmoothingEnabled = false;
+        encoderAnimCtx.drawImage(state.thumbnailsImage, sx, sy, CONFIG.THUMB_SIZE, CONFIG.THUMB_SIZE, 20, 20, 128, 128);
+        encoderAnimCtx.globalAlpha = 1;
+      }
+
+      let startTime = null;
+      const PHASE1 = 600;
+      const PHASE2 = 800;
+      const PHASE3 = 600;
+      const TOTAL = PHASE1 + PHASE2 + PHASE3;
+
+      function animate(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+
+        encoderAnimCtx.clearRect(0, 0, animW, animH);
+        drawAnimBackground();
+
+        if (elapsed < PHASE1) {
+          // Phase 1: Decomposition
+          const t = elapsed / PHASE1;
+          drawSourceGhost(1 - 0.8 * t);
+
+          particles.forEach(p => {
+            p.x += (Math.random() - 0.5) * 2;
+            p.y += (Math.random() - 0.5) * 2;
+            encoderAnimCtx.fillStyle = p.color;
+            encoderAnimCtx.beginPath();
+            encoderAnimCtx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+            encoderAnimCtx.fill();
+          });
+        } else if (elapsed < PHASE1 + PHASE2) {
+          // Phase 2: Flight along Bezier
+          drawSourceGhost(0.2);
+          const rawT = (elapsed - PHASE1) / PHASE2;
+
+          particles.forEach(p => {
+            const pDelay = p.delay / PHASE2;
+            const adjustedT = Math.max(0, Math.min(1, (rawT - pDelay) / (1 - pDelay)));
+            const eased = easeInOutCubic(adjustedT);
+
+            const pos = quadraticBezier(p.start, p.control, targetScreen, eased);
+            const { r, g, b } = p.colorRgb;
+            // Blend to encoder violet #6C8EBF = rgb(108, 142, 191)
+            const cr = Math.round(r + (108 - r) * eased);
+            const cg = Math.round(g + (142 - g) * eased);
+            const cb = Math.round(b + (191 - b) * eased);
+            const radius = 3 - 1.5 * eased;
+
+            encoderAnimCtx.fillStyle = `rgb(${cr},${cg},${cb})`;
+            encoderAnimCtx.beginPath();
+            encoderAnimCtx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+            encoderAnimCtx.fill();
+          });
+        } else if (elapsed < TOTAL) {
+          // Phase 3: Convergence
+          drawSourceGhost(0.2);
+          const t = (elapsed - PHASE1 - PHASE2) / PHASE3;
+          const sigma = (1 - t) * 30;
+
+          particles.forEach(p => {
+            const jx = gaussianRand() * sigma;
+            const jy = gaussianRand() * sigma;
+            encoderAnimCtx.fillStyle = '#6C8EBF';
+            encoderAnimCtx.beginPath();
+            encoderAnimCtx.arc(targetScreen.x + jx, targetScreen.y + jy, 1.5, 0, Math.PI * 2);
+            encoderAnimCtx.fill();
+          });
+
+          // In final 200ms, show pin forming
+          if (t > 0.67) {
+            const pinT = (t - 0.67) / 0.33;
+            const pinR = 6 * pinT;
+            encoderAnimCtx.beginPath();
+            encoderAnimCtx.arc(targetScreen.x, targetScreen.y, pinR, 0, Math.PI * 2);
+            encoderAnimCtx.fillStyle = '#6C8EBF';
+            encoderAnimCtx.fill();
+            encoderAnimCtx.strokeStyle = '#fff';
+            encoderAnimCtx.lineWidth = 2;
+            encoderAnimCtx.stroke();
+          }
+        } else {
+          // Done — draw final state
+          drawAnimBackground();
+          drawSourceGhost(0.2);
+
+          // Pin at target
+          encoderAnimCtx.beginPath();
+          encoderAnimCtx.arc(targetScreen.x, targetScreen.y, 6, 0, Math.PI * 2);
+          encoderAnimCtx.fillStyle = '#6C8EBF';
+          encoderAnimCtx.fill();
+          encoderAnimCtx.strokeStyle = '#fff';
+          encoderAnimCtx.lineWidth = 2;
+          encoderAnimCtx.stroke();
+
+          // Ring pulse
+          const pulseT = Math.min(1, (elapsed - TOTAL) / 400);
+          if (pulseT < 1) {
+            encoderAnimCtx.beginPath();
+            encoderAnimCtx.arc(targetScreen.x, targetScreen.y, 6 + 30 * pulseT, 0, Math.PI * 2);
+            encoderAnimCtx.strokeStyle = `rgba(108, 142, 191, ${1 - pulseT})`;
+            encoderAnimCtx.lineWidth = 2;
+            encoderAnimCtx.stroke();
+            requestAnimationFrame(animate);
+            return;
+          }
+
+          // Show comparison
+          showEncoderResult(dataIdx, targetZ);
+          encoderAnimRunning = false;
+          return;
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    async function showEncoderResult(dataIdx, targetZ) {
+      // Draw original
+      const pt = state.latentCoords[dataIdx];
+      const thumbIdx = pt.thumb_idx;
+      const sx = (thumbIdx % CONFIG.THUMB_COLS) * CONFIG.THUMB_SIZE;
+      const sy = Math.floor(thumbIdx / CONFIG.THUMB_COLS) * CONFIG.THUMB_SIZE;
+      const origCtx = encoderResultOriginal.getContext('2d');
+      origCtx.clearRect(0, 0, 128, 128);
+      origCtx.imageSmoothingEnabled = false;
+      origCtx.drawImage(state.thumbnailsImage, sx, sy, CONFIG.THUMB_SIZE, CONFIG.THUMB_SIZE, 0, 0, 128, 128);
+
+      // Decode reconstruction
+      const reconCtx = encoderResultRecon.getContext('2d');
+      reconCtx.clearRect(0, 0, 128, 128);
+
+      if (state.modelReady && !state.useSpriteFallback) {
+        const data = await decodeTFJS(targetZ[0], targetZ[1]);
+        if (data) {
+          const size = 32;
+          const imgData = reconCtx.createImageData(size, size);
+          for (let i = 0; i < size * size; i++) {
+            imgData.data[i * 4 + 0] = Math.round(data[i * 3 + 0] * 255);
+            imgData.data[i * 4 + 1] = Math.round(data[i * 3 + 1] * 255);
+            imgData.data[i * 4 + 2] = Math.round(data[i * 3 + 2] * 255);
+            imgData.data[i * 4 + 3] = 255;
+          }
+          const tmp = document.createElement('canvas');
+          tmp.width = size; tmp.height = size;
+          tmp.getContext('2d').putImageData(imgData, 0, 0);
+          reconCtx.imageSmoothingEnabled = false;
+          reconCtx.drawImage(tmp, 0, 0, 128, 128);
+        }
+      } else {
+        const atlas = decodeFromAtlas(targetZ[0], targetZ[1]);
+        if (atlas) {
+          reconCtx.imageSmoothingEnabled = false;
+          reconCtx.drawImage(atlas, 0, 0, 128, 128);
+        }
+      }
+
+      encoderResult.classList.add('visible');
+
+      // Also add a pin to the main latent canvas
+      if (state.pinnedPoints.length >= CONFIG.MAX_PINS) {
+        state.pinnedPoints.shift();
+      }
+      const color = CONFIG.PIN_COLORS[state.nextPinId % CONFIG.PIN_COLORS.length];
+      state.nextPinId++;
+      const thumbDataUrl = await decodeToDataUrl(targetZ[0], targetZ[1]);
+      state.pinnedPoints.push({ z: [targetZ[0], targetZ[1]], color, thumbDataUrl });
+      updateInterpState();
+      updateSVGOverlay();
+    }
+
+    // Trigger button
+    encoderTriggerBtn.addEventListener('click', () => {
+      if (selectedGalleryIdx !== null && !encoderAnimRunning) {
+        runEncoderAnimation(selectedGalleryIdx);
+      }
+    });
+
+    // IntersectionObserver for auto-trigger
+    const encoderObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !encoderAnimRunning && state.latentCoords) {
+          if (selectedGalleryIdx === null) {
+            selectGalleryImage(GALLERY_INDICES[0]);
+          }
+          // Don't auto-play; let user click the button or a gallery image
+        }
+      });
+    }, { threshold: 0.3 });
+
+    // Gallery image click also triggers animation
+    galleryStrip.addEventListener('click', (e) => {
+      const thumb = e.target.closest('.gallery-thumb');
+      if (!thumb) return;
+      const idx = parseInt(thumb.dataset.dataIdx);
+      selectGalleryImage(idx);
+      // Small delay then auto-play
+      if (!encoderAnimRunning) {
+        setTimeout(() => runEncoderAnimation(idx), 300);
+      }
+    });
+
+    /* ============================================
+       PROGRESSIVE DISCLOSURE — LAZY KATEX
+       ============================================ */
+    function setupAnnotations() {
+      document.querySelectorAll('details.annotation').forEach(d => {
+        d.addEventListener('toggle', () => {
+          if (d.open) {
+            renderKaTeXInElement(d);
+          }
+        });
+      });
+    }
+
+    function renderKaTeXInElement(el) {
+      if (typeof katex === 'undefined') return;
+      el.querySelectorAll('[data-katex]').forEach(mathEl => {
+        if (mathEl.dataset.rendered) return;
+        try {
+          katex.render(mathEl.dataset.katex, mathEl, {
+            displayMode: mathEl.classList.contains('math-block'),
+            throwOnError: false,
+          });
+          mathEl.dataset.rendered = 'true';
+        } catch (e) {
+          console.warn('KaTeX render error:', e);
+        }
+      });
+    }
+
+    /* ============================================
+       DEPTH TOGGLE
+       ============================================ */
+    const depthToggle = document.getElementById('depth-toggle');
+    const toggleLabel = depthToggle.querySelector('.toggle-label');
+
+    // Restore from localStorage
+    if (localStorage.getItem('showAllMath') === 'true') {
+      document.body.classList.add('show-all-math');
+      depthToggle.classList.add('active');
+      toggleLabel.textContent = 'Hide math';
+      // Force open all annotations
+      document.querySelectorAll('details.annotation').forEach(d => d.open = true);
+    }
+
+    depthToggle.addEventListener('click', () => {
+      const isActive = document.body.classList.toggle('show-all-math');
+      depthToggle.classList.toggle('active', isActive);
+      toggleLabel.textContent = isActive ? 'Hide math' : 'Show math';
+
+      try {
+        localStorage.setItem('showAllMath', isActive);
+      } catch (e) { /* Safari private mode */ }
+
+      document.querySelectorAll('details.annotation').forEach(d => {
+        d.open = isActive;
+        if (isActive) renderKaTeXInElement(d);
+      });
+    });
+
+    /* ============================================
        LOAD LATENT COORDS
        ============================================ */
     async function loadLatentCoords() {
@@ -1465,6 +2295,14 @@
 
       // Setup grid-to-scatter after assets are loaded
       setupGridScatter();
+
+      // Setup encoder gallery
+      setupEncoderGallery();
+
+      // Setup annotation listeners and observe encoder section
+      setupAnnotations();
+      const encoderSection = document.getElementById('act-encoder');
+      if (encoderSection) encoderObserver.observe(encoderSection);
 
       if (!state.modelReady && !state.atlasLoaded) {
         updateLoadingStatus('Assets not found \u2014 place model & atlas in web/assets/');
