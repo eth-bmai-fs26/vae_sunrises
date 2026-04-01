@@ -110,12 +110,13 @@
     }
 
     section[data-act="1"] {
-      min-height: 100vh;
+      min-height: 200vh;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       text-align: center;
+      padding-top: 15vh;
     }
 
     section[data-act="1"] h1 {
@@ -129,6 +130,22 @@
       opacity: 0;
       max-width: 500px;
       color: rgba(232, 228, 223, 0.8);
+    }
+
+    /* Grid-to-scatter canvas */
+    #grid-scatter-canvas {
+      margin-top: 3rem;
+      border-radius: 8px;
+    }
+
+    .grid-axis-label {
+      position: absolute;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
     }
 
     /* Act II: sticky two-column layout */
@@ -197,14 +214,20 @@
     #decoded-panel {
       margin-top: 1rem;
       display: flex;
-      align-items: center;
-      gap: 1rem;
+      flex-direction: column;
+      gap: 0.75rem;
       opacity: 0;
       transition: opacity 0.3s;
     }
 
     #decoded-panel.visible {
       opacity: 1;
+    }
+
+    .decoded-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
 
     #decoded-image {
@@ -222,6 +245,77 @@
       background: rgba(0, 0, 0, 0.4);
       padding: 0.5rem 0.75rem;
       border-radius: 4px;
+    }
+
+    #coord-readout .digit {
+      display: inline-block;
+      transition: transform 100ms ease;
+    }
+
+    /* 2-sigma boundary warning */
+    .boundary-warning {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: rgba(255, 200, 120, 0.5);
+      font-style: italic;
+      opacity: 0;
+      transition: opacity 0.3s;
+      margin-top: 0.25rem;
+    }
+
+    .boundary-warning.visible {
+      opacity: 1;
+    }
+
+    /* Interpolation slider */
+    #interp-container {
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+    }
+
+    #interp-container.visible {
+      display: flex;
+    }
+
+    #interp-container canvas {
+      width: 36px;
+      height: 36px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      image-rendering: pixelated;
+    }
+
+    #interp-slider {
+      flex: 1;
+      accent-color: var(--decoder-primary);
+    }
+
+    #interp-t-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--decoder-primary);
+      min-width: 3ch;
+      text-align: center;
+    }
+
+    /* Fallback badge */
+    #fallback-badge {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 100;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.5);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 0.25rem 0.5rem;
+      border-radius: 3px;
+      display: none;
     }
 
     /* Acts III, IV, V: placeholder styling */
@@ -337,7 +431,9 @@
   <section data-act="1" id="act-hook">
     <h1>Sunrise Machine</h1>
     <p class="subtitle">What if two numbers could paint a sunrise?</p>
-    <!-- Placeholder for grid/scatter (Agent 5 will add) -->
+    <canvas id="grid-scatter-canvas" width="520" height="520"></canvas>
+    <span class="grid-axis-label" id="gs-x-label">Time of Year &rarr;</span>
+    <span class="grid-axis-label" id="gs-y-label">Time of Day &rarr;</span>
   </section>
 
   <!-- ACT II: Decoder -->
@@ -359,8 +455,8 @@
           deep pre-dawn darkness below, bright midday light above.
         </p>
         <p>
-          <strong>Click anywhere on the canvas</strong> to decode a sunrise
-          from its latent coordinates.
+          <strong>Hover over the canvas</strong> to decode sunrises in real time.
+          <strong>Click</strong> to pin up to 4 favorites. Pin two to interpolate between them.
         </p>
       </div>
       <div class="canvas-column">
@@ -369,8 +465,19 @@
           <svg id="canvas-overlay" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet"></svg>
         </div>
         <div id="decoded-panel">
-          <canvas id="decoded-image" width="256" height="256"></canvas>
-          <div id="coord-readout">z = (0.00, 0.00)</div>
+          <div class="decoded-row">
+            <canvas id="decoded-image" width="256" height="256"></canvas>
+            <div>
+              <div id="coord-readout">z = (0.00, 0.00)</div>
+              <div class="boundary-warning" id="boundary-warning">Leaving the learned distribution...</div>
+            </div>
+          </div>
+          <div id="interp-container">
+            <canvas id="interp-thumb-a" width="64" height="64"></canvas>
+            <input type="range" id="interp-slider" min="0" max="1" step="0.01" value="0.5">
+            <canvas id="interp-thumb-b" width="64" height="64"></canvas>
+            <span id="interp-t-value">0.50</span>
+          </div>
         </div>
       </div>
     </div>
@@ -379,23 +486,24 @@
   <!-- ACT III: Encoder -->
   <section data-act="3" id="act-encoder">
     <h2>The Encoder</h2>
-    <p class="placeholder-text">Encoder experience coming soon…</p>
+    <p class="placeholder-text">Encoder experience coming soon...</p>
   </section>
 
   <!-- ACT IV: Variational -->
   <section data-act="4" id="act-variational">
     <h2>Why "Variational"?</h2>
-    <p class="placeholder-text">Temperature and beta controls coming soon…</p>
+    <p class="placeholder-text">Temperature and beta controls coming soon...</p>
   </section>
 
   <!-- ACT V: Sandbox -->
   <section data-act="5" id="act-sandbox">
     <h2>Your Turn</h2>
-    <p class="placeholder-text">Game and sandbox coming soon…</p>
+    <p class="placeholder-text">Game and sandbox coming soon...</p>
   </section>
 
   <!-- Loading indicator -->
-  <div id="loading-indicator">Loading model…</div>
+  <div id="loading-indicator">Loading model...</div>
+  <div id="fallback-badge">Lite mode</div>
 
   <script>
     /* ============================================
@@ -407,6 +515,11 @@
       DECODED_SIZE: 256,
       ATLAS_GRID: 24,
       ATLAS_CELL: 64,
+      THUMB_COLS: 45,
+      THUMB_SIZE: 32,
+      PIN_COLORS: ['#D4845A', '#F2C94C', '#E17055', '#6C8EBF'],
+      MAX_PINS: 4,
+      GRID_SCATTER_COUNT: 64,
       COLORS: {
         encoderPrimary: '#6C8EBF',
         decoderPrimary: '#D4845A',
@@ -426,12 +539,19 @@
       currentAct: 1,
       modelReady: false,
       useSpriteFallback: false,
+      slowFrames: 0,
       latentCursor: null,
-      pinnedPoints: [],
+      pinnedPoints: [],       // [{z: [z1,z2], color, id, thumbCanvas}]
+      interpPair: null,       // [pinIdx0, pinIdx1] or null
       decoder: null,
       atlasImage: null,
       atlasLoaded: false,
+      thumbnailsImage: null,
+      thumbnailsLoaded: false,
       latentCoords: null,
+      nextPinId: 0,
+      hoverDecodeScheduled: false,
+      isMobile: 'ontouchstart' in window && window.innerWidth < 768,
     };
 
     /* ============================================
@@ -452,6 +572,38 @@
     const decodedPanel = document.getElementById('decoded-panel');
     const canvasOverlay = document.getElementById('canvas-overlay');
     const loadingIndicator = document.getElementById('loading-indicator');
+    const boundaryWarning = document.getElementById('boundary-warning');
+    const interpContainer = document.getElementById('interp-container');
+    const interpSlider = document.getElementById('interp-slider');
+    const interpTValue = document.getElementById('interp-t-value');
+    const interpThumbA = document.getElementById('interp-thumb-a');
+    const interpThumbB = document.getElementById('interp-thumb-b');
+    const gridScatterCanvas = document.getElementById('grid-scatter-canvas');
+    const gridScatterCtx = gridScatterCanvas.getContext('2d');
+    const fallbackBadge = document.getElementById('fallback-badge');
+
+    /* ============================================
+       UTILITY
+       ============================================ */
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function screenToLatent(offsetX, offsetY) {
+      const rect = latentCanvas.getBoundingClientRect();
+      const px = offsetX / rect.width * latentCanvas.width;
+      const py = offsetY / rect.height * latentCanvas.height;
+      return [xScale.invert(px), yScale.invert(py)];
+    }
+
+    function latentToCanvas(z1, z2) {
+      return [xScale(z1), yScale(z2)];
+    }
+
+    function latentToSVG(z1, z2) {
+      // SVG viewBox is 0..500, canvas might be smaller, but overlay matches canvas via CSS
+      const sx = (z1 - CONFIG.LATENT_RANGE[0]) / (CONFIG.LATENT_RANGE[1] - CONFIG.LATENT_RANGE[0]) * CONFIG.CANVAS_SIZE;
+      const sy = (1 - (z2 - CONFIG.LATENT_RANGE[0]) / (CONFIG.LATENT_RANGE[1] - CONFIG.LATENT_RANGE[0])) * CONFIG.CANVAS_SIZE;
+      return [sx, sy];
+    }
 
     /* ============================================
        CANVAS SETUP
@@ -467,11 +619,16 @@
     }
 
     /* ============================================
-       SVG AXES
+       SVG AXES (base layer, rebuilt once)
        ============================================ */
     function drawAxes() {
       const ns = 'http://www.w3.org/2000/svg';
-      canvasOverlay.innerHTML = '';
+      // Clear only axis group, preserve overlay elements
+      const existing = canvasOverlay.querySelector('#axis-group');
+      if (existing) existing.remove();
+
+      const g = document.createElementNS(ns, 'g');
+      g.id = 'axis-group';
 
       const pad = 30;
       const size = CONFIG.CANVAS_SIZE;
@@ -479,11 +636,11 @@
       // Axis lines
       const xLine = document.createElementNS(ns, 'line');
       Object.entries({ x1: pad, y1: size - pad, x2: size - 5, y2: size - pad, stroke: 'rgba(255,255,255,0.4)', 'stroke-width': 1 }).forEach(([k, v]) => xLine.setAttribute(k, v));
-      canvasOverlay.appendChild(xLine);
+      g.appendChild(xLine);
 
       const yLine = document.createElementNS(ns, 'line');
       Object.entries({ x1: pad, y1: 5, x2: pad, y2: size - pad, stroke: 'rgba(255,255,255,0.4)', 'stroke-width': 1 }).forEach(([k, v]) => yLine.setAttribute(k, v));
-      canvasOverlay.appendChild(yLine);
+      g.appendChild(yLine);
 
       // Labels
       const xLabel = document.createElementNS(ns, 'text');
@@ -493,8 +650,8 @@
       xLabel.setAttribute('fill', 'rgba(255,255,255,0.6)');
       xLabel.setAttribute('font-size', '12');
       xLabel.setAttribute('font-family', 'Inter, sans-serif');
-      xLabel.textContent = 'time of year →';
-      canvasOverlay.appendChild(xLabel);
+      xLabel.textContent = 'time of year \u2192';
+      g.appendChild(xLabel);
 
       const yLabel = document.createElementNS(ns, 'text');
       yLabel.setAttribute('x', 12);
@@ -504,8 +661,8 @@
       yLabel.setAttribute('font-size', '12');
       yLabel.setAttribute('font-family', 'Inter, sans-serif');
       yLabel.setAttribute('transform', `rotate(-90, 12, ${size / 2})`);
-      yLabel.textContent = 'time of day →';
-      canvasOverlay.appendChild(yLabel);
+      yLabel.textContent = 'time of day \u2192';
+      g.appendChild(yLabel);
 
       // Tick marks
       const ticks = [-2, -1, 0, 1, 2];
@@ -513,7 +670,6 @@
         const xPos = xScale(t);
         const yPos = yScale(t);
 
-        // X-axis ticks
         const xTick = document.createElementNS(ns, 'text');
         xTick.setAttribute('x', xPos);
         xTick.setAttribute('y', size - pad + 15);
@@ -522,9 +678,8 @@
         xTick.setAttribute('font-size', '10');
         xTick.setAttribute('font-family', 'JetBrains Mono, monospace');
         xTick.textContent = t;
-        canvasOverlay.appendChild(xTick);
+        g.appendChild(xTick);
 
-        // Y-axis ticks
         const yTick = document.createElementNS(ns, 'text');
         yTick.setAttribute('x', pad - 8);
         yTick.setAttribute('y', yPos + 3);
@@ -533,8 +688,141 @@
         yTick.setAttribute('font-size', '10');
         yTick.setAttribute('font-family', 'JetBrains Mono, monospace');
         yTick.textContent = t;
-        canvasOverlay.appendChild(yTick);
+        g.appendChild(yTick);
       });
+
+      canvasOverlay.appendChild(g);
+    }
+
+    /* ============================================
+       SVG OVERLAY (crosshair, pins, interp line)
+       ============================================ */
+    function updateSVGOverlay() {
+      const ns = 'http://www.w3.org/2000/svg';
+      // Remove previous dynamic overlay
+      const old = canvasOverlay.querySelector('#dynamic-overlay');
+      if (old) old.remove();
+
+      const g = document.createElementNS(ns, 'g');
+      g.id = 'dynamic-overlay';
+      const size = CONFIG.CANVAS_SIZE;
+
+      // Crosshair
+      if (state.latentCursor) {
+        const [sx, sy] = latentToSVG(state.latentCursor[0], state.latentCursor[1]);
+
+        const hLine = document.createElementNS(ns, 'line');
+        Object.entries({ x1: 0, y1: sy, x2: size, y2: sy, stroke: 'rgba(255,255,255,0.2)', 'stroke-width': 0.5, 'stroke-dasharray': '4,4' }).forEach(([k, v]) => hLine.setAttribute(k, v));
+        g.appendChild(hLine);
+
+        const vLine = document.createElementNS(ns, 'line');
+        Object.entries({ x1: sx, y1: 0, x2: sx, y2: size, stroke: 'rgba(255,255,255,0.2)', 'stroke-width': 0.5, 'stroke-dasharray': '4,4' }).forEach(([k, v]) => vLine.setAttribute(k, v));
+        g.appendChild(vLine);
+
+        // Axis tick marks for current position
+        const tickLen = 6;
+        const xTick = document.createElementNS(ns, 'line');
+        Object.entries({ x1: sx, y1: size - 30, x2: sx, y2: size - 30 + tickLen, stroke: 'rgba(212,132,90,0.8)', 'stroke-width': 1.5 }).forEach(([k, v]) => xTick.setAttribute(k, v));
+        g.appendChild(xTick);
+
+        const yTick = document.createElementNS(ns, 'line');
+        Object.entries({ x1: 30 - tickLen, y1: sy, x2: 30, y2: sy, stroke: 'rgba(212,132,90,0.8)', 'stroke-width': 1.5 }).forEach(([k, v]) => yTick.setAttribute(k, v));
+        g.appendChild(yTick);
+
+        // 2-sigma boundary circle
+        const mag = Math.sqrt(state.latentCursor[0] ** 2 + state.latentCursor[1] ** 2);
+        if (mag > 2.0) {
+          const cx = size / 2;
+          const cy = size / 2;
+          const r = (2.5 / 3) * (size / 2); // 2.5 in latent = r in SVG
+          const circle = document.createElementNS(ns, 'circle');
+          Object.entries({ cx, cy, r, fill: 'none', stroke: 'rgba(255,200,120,0.3)', 'stroke-width': 1, 'stroke-dasharray': '6,4' }).forEach(([k, v]) => circle.setAttribute(k, v));
+          g.appendChild(circle);
+        }
+      }
+
+      // Interpolation line between selected pair
+      if (state.interpPair && state.pinnedPoints.length >= 2) {
+        const pA = state.pinnedPoints[state.interpPair[0]];
+        const pB = state.pinnedPoints[state.interpPair[1]];
+        if (pA && pB) {
+          const [ax, ay] = latentToSVG(pA.z[0], pA.z[1]);
+          const [bx, by] = latentToSVG(pB.z[0], pB.z[1]);
+          const line = document.createElementNS(ns, 'line');
+          Object.entries({ x1: ax, y1: ay, x2: bx, y2: by, stroke: 'rgba(255,255,255,0.4)', 'stroke-width': 1, 'stroke-dasharray': '6,3' }).forEach(([k, v]) => line.setAttribute(k, v));
+          g.appendChild(line);
+
+          // Moving dot for interpolation
+          const t = parseFloat(interpSlider.value);
+          const ix = lerp(ax, bx, t);
+          const iy = lerp(ay, by, t);
+          const dot = document.createElementNS(ns, 'circle');
+          Object.entries({ cx: ix, cy: iy, r: 4, fill: 'var(--accent)', stroke: '#fff', 'stroke-width': 1 }).forEach(([k, v]) => dot.setAttribute(k, v));
+          g.appendChild(dot);
+        }
+      }
+
+      // Pins
+      state.pinnedPoints.forEach((pin, i) => {
+        const [px, py] = latentToSVG(pin.z[0], pin.z[1]);
+        const isDimmed = state.interpPair && !state.interpPair.includes(i);
+
+        // Pin circle
+        const circle = document.createElementNS(ns, 'circle');
+        Object.entries({
+          cx: px, cy: py, r: 6,
+          fill: pin.color,
+          stroke: '#fff',
+          'stroke-width': 2,
+          opacity: isDimmed ? 0.4 : 1,
+        }).forEach(([k, v]) => circle.setAttribute(k, v));
+        g.appendChild(circle);
+
+        // Pin number
+        const label = document.createElementNS(ns, 'text');
+        label.setAttribute('x', px + 10);
+        label.setAttribute('y', py - 10);
+        label.setAttribute('fill', pin.color);
+        label.setAttribute('font-size', '11');
+        label.setAttribute('font-family', 'JetBrains Mono, monospace');
+        label.setAttribute('opacity', isDimmed ? 0.4 : 1);
+        label.textContent = (i + 1).toString();
+        g.appendChild(label);
+
+        // Thumbnail line + image (as foreignObject)
+        if (pin.thumbDataUrl) {
+          const thumbSize = 48;
+          const tx = px + 15;
+          const ty = py - 15 - thumbSize;
+
+          // Connector line
+          const tLine = document.createElementNS(ns, 'line');
+          Object.entries({ x1: px, y1: py - 6, x2: tx + thumbSize / 2, y2: ty + thumbSize, stroke: 'rgba(255,255,255,0.3)', 'stroke-width': 0.5 }).forEach(([k, v]) => tLine.setAttribute(k, v));
+          g.appendChild(tLine);
+
+          // Thumbnail via foreignObject
+          const fo = document.createElementNS(ns, 'foreignObject');
+          fo.setAttribute('x', tx);
+          fo.setAttribute('y', ty);
+          fo.setAttribute('width', thumbSize);
+          fo.setAttribute('height', thumbSize);
+          fo.innerHTML = `<img src="${pin.thumbDataUrl}" style="width:${thumbSize}px;height:${thumbSize}px;border-radius:4px;border:1px solid ${pin.color};image-rendering:pixelated;opacity:${isDimmed ? 0.4 : 1}" xmlns="http://www.w3.org/1999/xhtml">`;
+          g.appendChild(fo);
+
+          // Coordinate label
+          const coordLabel = document.createElementNS(ns, 'text');
+          coordLabel.setAttribute('x', tx);
+          coordLabel.setAttribute('y', ty + thumbSize + 12);
+          coordLabel.setAttribute('fill', 'rgba(255,255,255,0.5)');
+          coordLabel.setAttribute('font-size', '8');
+          coordLabel.setAttribute('font-family', 'JetBrains Mono, monospace');
+          coordLabel.setAttribute('opacity', isDimmed ? 0.4 : 1);
+          coordLabel.textContent = `(${pin.z[0].toFixed(2)}, ${pin.z[1].toFixed(2)})`;
+          g.appendChild(coordLabel);
+        }
+      });
+
+      canvasOverlay.appendChild(g);
     }
 
     /* ============================================
@@ -573,8 +861,7 @@
        ============================================ */
     async function loadModel() {
       try {
-        state.decoder = await tf.loadGraphModel('assets/model/decoder.json');
-        // Warmup: 3 inferences
+        state.decoder = await tf.loadGraphModel('assets/model/model.json');
         for (let i = 0; i < 3; i++) {
           const dummy = tf.tensor2d([[0, 0]]);
           const out = state.decoder.predict(dummy);
@@ -595,7 +882,7 @@
     }
 
     /* ============================================
-       SPRITE ATLAS
+       SPRITE ATLAS + THUMBNAILS
        ============================================ */
     function loadAtlas() {
       return new Promise((resolve) => {
@@ -613,6 +900,21 @@
           resolve();
         };
         state.atlasImage.src = 'assets/sprites/atlas.webp';
+      });
+    }
+
+    function loadThumbnails() {
+      return new Promise((resolve) => {
+        state.thumbnailsImage = new Image();
+        state.thumbnailsImage.onload = () => {
+          state.thumbnailsLoaded = true;
+          resolve();
+        };
+        state.thumbnailsImage.onerror = () => {
+          console.warn('Thumbnails sprite not found');
+          resolve();
+        };
+        state.thumbnailsImage.src = 'assets/sprites/thumbnails.webp';
       });
     }
 
@@ -637,17 +939,14 @@
       const [lo, hi] = CONFIG.LATENT_RANGE;
       const range = hi - lo;
 
-      // Map z to continuous grid position
       const gx = ((z1 - lo) / range) * (grid - 1);
-      const gy = ((hi - z2) / range) * (grid - 1); // flip Y
+      const gy = ((hi - z2) / range) * (grid - 1);
 
-      // Clamp
       const gxc = Math.max(0, Math.min(grid - 2, Math.floor(gx)));
       const gyc = Math.max(0, Math.min(grid - 2, Math.floor(gy)));
       const fx = gx - gxc;
       const fy = gy - gyc;
 
-      // Bilinear interpolation: draw 4 cells blended
       const offscreen = document.createElement('canvas');
       offscreen.width = cell;
       offscreen.height = cell;
@@ -670,23 +969,27 @@
       return offscreen;
     }
 
-    async function decodeAuto(z1, z2) {
+    async function decodeAndRender(z) {
+      const [z1, z2] = z;
+
       if (state.modelReady && !state.useSpriteFallback) {
         const start = performance.now();
         const data = await decodeTFJS(z1, z2);
         const elapsed = performance.now() - start;
         if (data) {
           renderDecodedData(data);
-          // If too slow, switch to fallback
-          if (elapsed > 100) {
-            console.warn(`Decode took ${elapsed.toFixed(0)}ms, switching to atlas fallback`);
-            state.useSpriteFallback = true;
+          if (elapsed > 33) {
+            if (++state.slowFrames >= 3) {
+              state.useSpriteFallback = true;
+              showFallbackBadge();
+            }
+          } else {
+            state.slowFrames = 0;
           }
           return;
         }
       }
 
-      // Atlas fallback
       const atlasResult = decodeFromAtlas(z1, z2);
       if (atlasResult) {
         decodedCtx.clearRect(0, 0, CONFIG.DECODED_SIZE, CONFIG.DECODED_SIZE);
@@ -696,7 +999,6 @@
     }
 
     function renderDecodedData(data) {
-      // data is Float32Array from TF.js, shape [1, 32, 32, 3] flattened
       const size = 32;
       const imgData = decodedCtx.createImageData(size, size);
       for (let i = 0; i < size * size; i++) {
@@ -705,7 +1007,6 @@
         imgData.data[i * 4 + 2] = Math.round(data[i * 3 + 2] * 255);
         imgData.data[i * 4 + 3] = 255;
       }
-      // Draw to offscreen then scale up
       const offscreen = document.createElement('canvas');
       offscreen.width = size;
       offscreen.height = size;
@@ -715,21 +1016,348 @@
       decodedCtx.drawImage(offscreen, 0, 0, CONFIG.DECODED_SIZE, CONFIG.DECODED_SIZE);
     }
 
-    /* ============================================
-       CLICK HANDLER (latent canvas)
-       ============================================ */
-    latentCanvas.addEventListener('click', async (e) => {
-      const rect = latentCanvas.getBoundingClientRect();
-      const px = (e.clientX - rect.left) / rect.width * latentCanvas.width;
-      const py = (e.clientY - rect.top) / rect.height * latentCanvas.height;
-      const z1 = xScale.invert(px);
-      const z2 = yScale.invert(py);
+    function showFallbackBadge() {
+      fallbackBadge.style.display = 'block';
+    }
 
-      coordReadout.textContent = `z = (${z1.toFixed(2)}, ${z2.toFixed(2)})`;
+    /* ============================================
+       DECODE TO DATA URL (for pin thumbnails)
+       ============================================ */
+    async function decodeToDataUrl(z1, z2) {
+      const tmpCanvas = document.createElement('canvas');
+      tmpCanvas.width = 64;
+      tmpCanvas.height = 64;
+      const tmpCtx = tmpCanvas.getContext('2d');
+
+      if (state.modelReady && !state.useSpriteFallback) {
+        const data = await decodeTFJS(z1, z2);
+        if (data) {
+          const size = 32;
+          const imgData = tmpCtx.createImageData(size, size);
+          for (let i = 0; i < size * size; i++) {
+            imgData.data[i * 4 + 0] = Math.round(data[i * 3 + 0] * 255);
+            imgData.data[i * 4 + 1] = Math.round(data[i * 3 + 1] * 255);
+            imgData.data[i * 4 + 2] = Math.round(data[i * 3 + 2] * 255);
+            imgData.data[i * 4 + 3] = 255;
+          }
+          const small = document.createElement('canvas');
+          small.width = size;
+          small.height = size;
+          small.getContext('2d').putImageData(imgData, 0, 0);
+          tmpCtx.imageSmoothingEnabled = false;
+          tmpCtx.drawImage(small, 0, 0, 64, 64);
+          return tmpCanvas.toDataURL();
+        }
+      }
+
+      const atlasResult = decodeFromAtlas(z1, z2);
+      if (atlasResult) {
+        tmpCtx.imageSmoothingEnabled = false;
+        tmpCtx.drawImage(atlasResult, 0, 0, 64, 64);
+        return tmpCanvas.toDataURL();
+      }
+
+      return null;
+    }
+
+    /* ============================================
+       COORDINATE READOUT WITH DIGIT TRANSITIONS
+       ============================================ */
+    function updateCoordReadout(z1, z2) {
+      const fmt = (v) => v.toFixed(2);
+      const s1 = fmt(z1);
+      const s2 = fmt(z2);
+      const text = `z = (${s1}, ${s2})`;
+      // Simple text update — digit spans add visual noise for minimal gain
+      coordReadout.textContent = text;
+    }
+
+    /* ============================================
+       HOVER-TO-DECODE (Act II)
+       ============================================ */
+    latentCanvas.addEventListener('pointermove', (e) => {
+      if (state.isMobile) return;
+      const [z1, z2] = screenToLatent(e.offsetX, e.offsetY);
+      state.latentCursor = [z1, z2];
+
+      updateCoordReadout(z1, z2);
       decodedPanel.classList.add('visible');
 
-      await decodeAuto(z1, z2);
+      // Boundary warning
+      const mag = Math.sqrt(z1 * z1 + z2 * z2);
+      boundaryWarning.classList.toggle('visible', mag > 2.5);
+
+      updateSVGOverlay();
+
+      if (!state.hoverDecodeScheduled) {
+        state.hoverDecodeScheduled = true;
+        requestAnimationFrame(async () => {
+          // If interpolation is active, don't override with hover
+          if (!state.interpPair) {
+            await decodeAndRender(state.latentCursor);
+          }
+          state.hoverDecodeScheduled = false;
+        });
+      }
     });
+
+    latentCanvas.addEventListener('pointerleave', () => {
+      state.latentCursor = null;
+      boundaryWarning.classList.remove('visible');
+      updateSVGOverlay();
+    });
+
+    /* ============================================
+       CLICK-TO-PIN (Act II)
+       ============================================ */
+    latentCanvas.addEventListener('pointerdown', async (e) => {
+      const [z1, z2] = screenToLatent(e.offsetX, e.offsetY);
+
+      // Check if clicking near existing pin (unpin)
+      const hitRadius = 15; // pixels in SVG space
+      for (let i = 0; i < state.pinnedPoints.length; i++) {
+        const pin = state.pinnedPoints[i];
+        const [px, py] = latentToSVG(pin.z[0], pin.z[1]);
+        const [cx, cy] = latentToSVG(z1, z2);
+        const dist = Math.sqrt((px - cx) ** 2 + (py - cy) ** 2);
+        if (dist < hitRadius) {
+          // Remove pin
+          state.pinnedPoints.splice(i, 1);
+          updateInterpState();
+          updateSVGOverlay();
+          return;
+        }
+      }
+
+      // Add new pin
+      if (state.pinnedPoints.length >= CONFIG.MAX_PINS) {
+        state.pinnedPoints.shift(); // remove oldest
+      }
+
+      const color = CONFIG.PIN_COLORS[state.nextPinId % CONFIG.PIN_COLORS.length];
+      state.nextPinId++;
+
+      const thumbDataUrl = await decodeToDataUrl(z1, z2);
+
+      const pin = {
+        z: [z1, z2],
+        color,
+        thumbDataUrl,
+      };
+
+      state.pinnedPoints.push(pin);
+
+      // Animate pin appearance (handled by SVG re-render; elastic effect via CSS isn't trivial here)
+      updateInterpState();
+      updateSVGOverlay();
+
+      // Decode and show
+      updateCoordReadout(z1, z2);
+      decodedPanel.classList.add('visible');
+      await decodeAndRender([z1, z2]);
+    });
+
+    /* ============================================
+       INTERPOLATION STATE
+       ============================================ */
+    function updateInterpState() {
+      if (state.pinnedPoints.length === 2) {
+        state.interpPair = [0, 1];
+        showInterpSlider();
+      } else if (state.pinnedPoints.length > 2) {
+        // Keep existing pair if still valid, otherwise pick last two
+        if (state.interpPair) {
+          const [a, b] = state.interpPair;
+          if (a >= state.pinnedPoints.length || b >= state.pinnedPoints.length) {
+            state.interpPair = [state.pinnedPoints.length - 2, state.pinnedPoints.length - 1];
+          }
+        } else {
+          state.interpPair = [state.pinnedPoints.length - 2, state.pinnedPoints.length - 1];
+        }
+        showInterpSlider();
+      } else {
+        state.interpPair = null;
+        interpContainer.classList.remove('visible');
+      }
+    }
+
+    async function showInterpSlider() {
+      if (!state.interpPair) return;
+      const pA = state.pinnedPoints[state.interpPair[0]];
+      const pB = state.pinnedPoints[state.interpPair[1]];
+      if (!pA || !pB) return;
+
+      interpContainer.classList.add('visible');
+
+      // Draw thumbnails for endpoints
+      if (pA.thumbDataUrl) {
+        const img = new Image();
+        img.onload = () => {
+          const ctx = interpThumbA.getContext('2d');
+          ctx.clearRect(0, 0, 64, 64);
+          ctx.drawImage(img, 0, 0, 64, 64);
+        };
+        img.src = pA.thumbDataUrl;
+      }
+      if (pB.thumbDataUrl) {
+        const img = new Image();
+        img.onload = () => {
+          const ctx = interpThumbB.getContext('2d');
+          ctx.clearRect(0, 0, 64, 64);
+          ctx.drawImage(img, 0, 0, 64, 64);
+        };
+        img.src = pB.thumbDataUrl;
+      }
+
+      // Decode at current slider position
+      await doInterpolation(parseFloat(interpSlider.value));
+    }
+
+    async function doInterpolation(t) {
+      if (!state.interpPair) return;
+      const pA = state.pinnedPoints[state.interpPair[0]];
+      const pB = state.pinnedPoints[state.interpPair[1]];
+      if (!pA || !pB) return;
+
+      const z1 = lerp(pA.z[0], pB.z[0], t);
+      const z2 = lerp(pA.z[1], pB.z[1], t);
+
+      interpTValue.textContent = t.toFixed(2);
+      updateCoordReadout(z1, z2);
+      await decodeAndRender([z1, z2]);
+      updateSVGOverlay();
+    }
+
+    interpSlider.addEventListener('input', async () => {
+      const t = parseFloat(interpSlider.value);
+      await doInterpolation(t);
+    });
+
+    // Allow selecting interpolation pair by clicking 2 pins sequentially
+    let interpSelectBuffer = [];
+    canvasOverlay.addEventListener('click', (e) => {
+      // This overlay has pointer-events: none, so this won't fire
+      // Pin selection is handled in the pointerdown on latentCanvas
+    });
+
+    /* ============================================
+       GRID-TO-SCATTER ANIMATION (Act I)
+       ============================================ */
+    let gridPositions = [];
+    let scatterPositions = [];
+    let tileIndices = [];
+
+    function setupGridScatter() {
+      if (!state.latentCoords || !state.thumbnailsLoaded) return;
+
+      const count = Math.min(CONFIG.GRID_SCATTER_COUNT, state.latentCoords.length);
+      const cols = Math.ceil(Math.sqrt(count));
+      const rows = Math.ceil(count / cols);
+      const canvasW = gridScatterCanvas.width;
+      const canvasH = gridScatterCanvas.height;
+      const tileSize = 32;
+      const padding = 40;
+
+      // Pick evenly-spaced indices from the dataset
+      tileIndices = [];
+      const step = Math.floor(state.latentCoords.length / count);
+      for (let i = 0; i < count; i++) {
+        tileIndices.push(i * step);
+      }
+
+      // Grid positions (centered 8x8)
+      gridPositions = [];
+      const gridSpacingX = (canvasW - 2 * padding) / (cols - 1);
+      const gridSpacingY = (canvasH - 2 * padding) / (rows - 1);
+      for (let i = 0; i < count; i++) {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        gridPositions.push({
+          x: padding + col * gridSpacingX,
+          y: padding + row * gridSpacingY,
+        });
+      }
+
+      // Scatter positions (z mapped to canvas)
+      const gsXScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([padding, canvasW - padding]);
+      const gsYScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([canvasH - padding, padding]);
+
+      scatterPositions = [];
+      for (let i = 0; i < count; i++) {
+        const pt = state.latentCoords[tileIndices[i]];
+        scatterPositions.push({
+          x: gsXScale(pt.z[0]),
+          y: gsYScale(pt.z[1]),
+        });
+      }
+
+      renderTiles(0);
+      setupGridScatterScroll();
+    }
+
+    function renderTiles(t) {
+      const w = gridScatterCanvas.width;
+      const h = gridScatterCanvas.height;
+      gridScatterCtx.clearRect(0, 0, w, h);
+
+      if (!state.thumbnailsLoaded || !state.thumbnailsImage) return;
+
+      const thumbSize = CONFIG.THUMB_SIZE;
+      const thumbCols = CONFIG.THUMB_COLS;
+      const drawSize = 32;
+
+      for (let i = 0; i < tileIndices.length; i++) {
+        const idx = tileIndices[i];
+        const pt = state.latentCoords[idx];
+        const thumbIdx = pt.thumb_idx;
+
+        const sx = (thumbIdx % thumbCols) * thumbSize;
+        const sy = Math.floor(thumbIdx / thumbCols) * thumbSize;
+
+        const x = lerp(gridPositions[i].x, scatterPositions[i].x, t);
+        const y = lerp(gridPositions[i].y, scatterPositions[i].y, t);
+
+        gridScatterCtx.drawImage(
+          state.thumbnailsImage,
+          sx, sy, thumbSize, thumbSize,
+          x - drawSize / 2, y - drawSize / 2, drawSize, drawSize
+        );
+      }
+    }
+
+    function setupGridScatterScroll() {
+      const xLabel = document.getElementById('gs-x-label');
+      const yLabel = document.getElementById('gs-y-label');
+
+      ScrollTrigger.create({
+        trigger: '#act-hook',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1,
+        onUpdate: (self) => {
+          const t = self.progress;
+          renderTiles(t);
+
+          // Fade in axis labels during scatter phase
+          const labelOpacity = Math.max(0, (t - 0.5) * 2);
+          if (xLabel) xLabel.style.opacity = labelOpacity;
+          if (yLabel) yLabel.style.opacity = labelOpacity;
+        },
+      });
+
+      // Position axis labels relative to canvas
+      if (xLabel && yLabel) {
+        const rect = gridScatterCanvas.getBoundingClientRect();
+        const section = document.getElementById('act-hook');
+        const sRect = section.getBoundingClientRect();
+        xLabel.style.bottom = '15vh';
+        xLabel.style.left = '50%';
+        xLabel.style.transform = 'translateX(-50%)';
+        yLabel.style.top = '40vh';
+        yLabel.style.left = 'calc(50% - 280px)';
+        yLabel.style.transform = 'rotate(-90deg)';
+      }
+    }
 
     /* ============================================
        LOAD LATENT COORDS
@@ -760,7 +1388,6 @@
           state.scrollProgress = self.progress;
           document.body.style.backgroundColor = bgInterpolator(self.progress);
 
-          // Text color transition: dark text for light backgrounds (acts 4-5)
           if (self.progress > 0.65) {
             document.body.style.color = CONFIG.COLORS.textOnLight;
           } else {
@@ -830,25 +1457,24 @@
       const atlasPromise = loadAtlas();
       const modelPromise = loadModel();
       const coordsPromise = loadLatentCoords();
+      const thumbsPromise = loadThumbnails();
 
-      // Show content immediately
       setupScroll();
 
-      // Wait for all loads
-      await Promise.all([atlasPromise, modelPromise, coordsPromise]);
+      await Promise.all([atlasPromise, modelPromise, coordsPromise, thumbsPromise]);
 
-      // If neither model nor atlas loaded, show a friendly message
+      // Setup grid-to-scatter after assets are loaded
+      setupGridScatter();
+
       if (!state.modelReady && !state.atlasLoaded) {
-        updateLoadingStatus('Assets not found — place model & atlas in web/assets/');
+        updateLoadingStatus('Assets not found \u2014 place model & atlas in web/assets/');
       }
     }
 
-    // Handle resize
     window.addEventListener('resize', () => {
       setupCanvas();
     });
 
-    // Boot
     init();
   </script>
 </body>
