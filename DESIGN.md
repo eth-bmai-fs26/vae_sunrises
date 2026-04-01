@@ -1,523 +1,504 @@
-# VAE Sunrise Visualization -- Converged Design Document
+# Sunrise Machine — Interactive VAE Visualization
 
-**Status:** Final Draft
+**Status:** Converged Design (3 rounds of multi-agent debate)
 **Date:** 2026-04-01
-**Synthesized from:** Visual Designer, Interaction Designer, Technical Architect proposals
+**Agents:** V (Visual Designer), I (Interaction Designer), T (Technical Architect)
+**Rounds:** 3 (independent proposals → cross-critique → final positions)
 
 ---
 
-## 1. Vision & Guiding Principles
+## 1. Vision
 
-An interactive, scrollytelling webpage that teaches Variational Autoencoders through the lens of sunrise photography. The page itself enacts a sunrise -- scrolling from dark indigo to golden light -- so the medium reinforces the message.
+An interactive scrollytelling webpage that teaches Variational Autoencoders through fabricated sunrise images. The page itself enacts a sunrise — scrolling from deep indigo night to golden dawn to warm cream daylight — so the medium embodies the message.
 
-**Three principles govern every decision:**
+**The core insight:** The VAE's decoder IS the rendering engine. Every point the user touches in latent space generates a sunrise in real time via TensorFlow.js in the browser (~1-2ms per decode). The user's pointer becomes the latent vector. Their scroll becomes the sunrise.
 
-1. **Direct manipulation over explanation.** Every concept the user reads about, they can immediately touch. No "submit" buttons. Linked representations everywhere (Bret Victor style).
-2. **Progressive disclosure.** The default layer is intuitive (no equations, plain language). Technical terminology and math are expandable, never forced.
-3. **Performance is a feature.** Real-time decoder inference in the browser (~1ms per frame) makes the "magic" feel instant. If it can't be instant, pre-compute it.
+### Guiding Principles (unanimous)
 
----
-
-## 2. Points of Agreement Across All Three Proposals
-
-All three specialists converge on these points, which form the non-negotiable core:
-
-- **Single HTML file deployment** (or minimal file set) on GitHub Pages
-- **Scrollytelling narrative arc** with sticky interactive sections
-- **Real-time VAE decoder in browser** via TensorFlow.js with pre-computed sprite atlas fallback
-- **Latent space as the interactive centerpiece** -- hover to decode, click to pin, drag to explore
-- **Particle animation for the encoder** -- image visually compresses to two coordinates
-- **Interpolation as the key "aha" moment** -- dragging between points shows smooth morphing
-- **Canvas for performance-critical rendering**, SVG overlay for labels/axes
-- **KaTeX for math**, shown progressively
-- **DM Serif Display / Source Sans 3 / JetBrains Mono** typography stack
+1. **Direct manipulation over explanation.** Every concept is touchable. No "submit" buttons. Linked representations everywhere (Bret Victor). The decoded image is always visible when the latent space is on screen.
+2. **Progressive disclosure.** Default layer: intuitive, no equations, plain language. Technical terminology and math (KaTeX) are expandable via `<details>`, never forced. Three layers: intuitive → technical → deep dive.
+3. **Performance is a feature.** If it can't be instant, pre-compute it. Sprite atlas fallback guarantees the experience works on any device.
+4. **Beauty as pedagogy.** The sunrises ARE the reward. Every interaction produces something visually pleasing. The user explores because the output is gorgeous.
 
 ---
 
-## 3. Conflicts & Resolutions
+## 2. Narrative Structure — 5 Acts (converged Round 1, all agents agreed by Round 2)
 
-### 3.1 Narrative Structure: 7 Sections vs. 5 Acts
+Decoder-first pedagogy: show what the decoder produces BEFORE explaining the encoder. The user must understand "2 numbers → image" before "image → 2 numbers" makes sense.
 
-**Visual Designer** proposes 7 sections (Hero, Data Grid, Encoder, Latent Space, Decoder, Math, Why It Matters). **Interaction Designer** proposes 5 Acts (Hook, Decoder, Encoder, Variational, Sandbox).
+| Act | Theme Name | Scroll % | Background | Content |
+|-----|-----------|----------|------------|---------|
+| **I: Twilight** | The Hook | 0–18% | #0B0E1A → #141832 | Hero "First Pixel" bloom, sunrise grid, grid-to-scatter FLIP animation |
+| **II: First Light** | The Decoder | 18–45% | #2A1F4E → #4A2545 | Latent canvas sticky. Hover-to-decode. Click-to-pin. Interpolation slider. |
+| **III: Golden Hour** | The Encoder | 45–65% | #7A3B2E → #C2753A | Gallery → particle compression animation → point lands in latent space → drag to verify |
+| **IV: Full Day** | The Variational Part | 65–82% | #C2753A → #E8A84C | Temperature slider, KL divergence breathing, beta tug-of-war |
+| **V: Reflection** | The Full Picture | 82–100% | #E8A84C → #FFF8F0 | Find the Sunrise game, sandbox, "ghost sunrise" souvenir, outro |
 
-**Resolution:** Adopt the Interaction Designer's 5-Act structure as the backbone -- it has stronger pedagogical logic (showing the decoder BEFORE the encoder is the correct teaching order for VAEs, because understanding "latent space maps to images" must precede "images map to latent space"). Fold the Visual Designer's Hero and Data Grid into Act I, and "Why It Matters" into Act V. The Math section becomes expandable annotations throughout, not a standalone section.
-
-**Final structure:**
-
-| Act | Visual Theme | Content |
-|-----|-------------|---------|
-| **I: The Hook** | Deep indigo (#0B0E2D), star-field feel | Hero sunrise animation, grid of sunrise thumbnails that rearranges by similarity then collapses into 2D scatter |
-| **II: The Decoder** | Indigo to violet transition | Latent space becomes sticky. Hover-to-preview activates. Click to pin. Path drawing. "Every point is a sunrise." |
-| **III: The Encoder** | Violet to rose | Pick a sunrise from gallery, watch particle compression animation, point appears in latent space, drag to verify |
-| **IV: The Variational Part** | Rose to gold | Temperature slider, KL divergence "breathing" visualization, beta slider tug-of-war between reconstruction and regularization |
-| **V: The Full Picture** | Gold to warm cream (#FFF8F0) | Reconstruction game, sandbox mode combining all tools, "Why It Matters" outro |
-
-### 3.2 Scope of Gamification
-
-**Interaction Designer** proposes 4 games (Find the Sunrise, Latent Space Cartographer, Blind Encoder, Interpolation Challenge). This is too much for launch.
-
-**Resolution:** Keep "Find the Sunrise" (P0) as it directly teaches the core concept. Move Latent Space Cartographer to P1. Cut Blind Encoder and Interpolation Challenge entirely (P2 at best) -- they add complexity without proportional pedagogical value.
-
-### 3.3 Path Drawing Complexity
-
-**Interaction Designer** proposes Catmull-Rom splines with preset paths. **Technical Architect** does not mention path drawing but the performance budget supports it.
-
-**Resolution:** P1 feature. For P0, support only linear interpolation between two pinned points (a slider). Path drawing with splines is a clear P1 -- it is high-impact but not required to teach the core concept.
-
-### 3.4 Pinch-to-Zoom and Minimap
-
-**Interaction Designer** proposes pinch-to-zoom with minimap and density overlays. This adds significant interaction complexity.
-
-**Resolution:** P2. The latent space for this VAE is 2D with ~1000 training images -- it does not need multi-scale navigation. A fixed viewport with slight zoom (scroll-wheel or pinch, 0.5x to 3x range) is P1. Full minimap and density overlays are P2.
-
-### 3.5 Model Format: TF.js vs. ONNX Runtime Web
-
-**Technical Architect** suggests TF.js as primary with ONNX as alternative.
-
-**Resolution:** Use TF.js. It has better browser support, a smaller bundle when cherry-picked, and the model is tiny enough that optimization differences are irrelevant. The sprite atlas fallback eliminates the need for a second runtime.
-
-### 3.6 Truly Single HTML File vs. Separate Assets
-
-**Technical Architect** mentions both options. **Visual Designer** implies separate assets (images, fonts).
-
-**Resolution:** Primary deployment is a small set of files (index.html + model files + sprite atlas + font files). A single-HTML build target with base64-encoded weights is a P2 convenience feature. Fonts load from Google Fonts CDN, not self-hosted (saves ~200KB).
+**Page length:** ~5500px (converged Round 3: V proposed 4000-5000, I proposed 6000-8000, settled at 5500 for decisive gradient shifts while allowing breathing room for sticky sections).
 
 ---
 
-## 4. Final Feature List with Priorities
+## 3. Resolved Disagreements (3-round debate record)
 
-### P0 -- Launch Requirements
+### 3.1 Cursor Trail
+- **V (R1):** 8-position trail with spring-bounce physics
+- **I (R1):** No trail, crosshair only
+- **T (R2):** Cut to P2
+- **V (R3):** Accepts I. No trail.
+- **I (R3):** Cut to P2.
+- **T (R3):** No trail, crosshair only.
+- **RESOLUTION: No cursor trail for P0. Simple crosshair. The decoded image is the feedback, not the cursor.** (Unanimous by R3)
 
-These are the features without which the page does not accomplish its teaching goal.
+### 3.2 Canvas Architecture
+- **V (R1):** Elaborate multi-layer
+- **I (R1):** Canvas2D everywhere, single event layer
+- **T (R1):** 4 layers (grid + particle + decode + UI)
+- **V (R3):** Accepts T's 3-layer
+- **I (R3):** Accepts T's 3-layer
+- **T (R3):** Revised to 2 layers (Canvas2D + SVG overlay)
+- **RESOLUTION: 2 layers for P0 — one Canvas2D (latent space, decoded images, particles, training dots) + one SVG overlay (axes, labels, coordinates, interactive controls). Add WebGL particle canvas in Phase 2 only if Canvas2D proves insufficient for 200 particles.** (Converged: simplest approach wins)
 
-| # | Feature | Owner Domain |
-|---|---------|-------------|
-| P0.1 | **Scrollytelling skeleton** -- 5-act structure with scroll-triggered transitions via Intersection Observer | Visual + Tech |
-| P0.2 | **Background gradient** -- page background shifts indigo to gold to cream as user scrolls | Visual |
-| P0.3 | **Sunrise data grid** -- display ~200 sunrise thumbnails in a grid that animates into the 2D latent scatter | Visual + Interaction |
-| P0.4 | **Latent space canvas** -- 2D interactive canvas with axes, labeled regions, and training point dots | Tech + Interaction |
-| P0.5 | **Hover-to-decode** -- move pointer over latent canvas, see decoded sunrise image at ~30fps in a panel beside/above the canvas | Interaction + Tech |
-| P0.6 | **Click-to-pin** -- click to pin up to 4 sunrises on the canvas with thumbnail + coordinates | Interaction |
-| P0.7 | **Linear interpolation slider** -- select two pinned points, drag slider to see morph between them | Interaction |
-| P0.8 | **Encoder particle animation** -- select a sunrise, watch it decompose into particles that converge to its (mu, sigma) point in latent space | Visual + Tech |
-| P0.9 | **TF.js decoder inference** -- real-time decoding of arbitrary latent coordinates in browser | Tech |
-| P0.10 | **Sprite atlas fallback** -- 20x20 grid of pre-computed decoded images, bilinear interpolation for points between grid cells | Tech |
-| P0.11 | **Progressive disclosure** -- expandable "Learn more" annotations for technical terms and math (KaTeX) | Interaction + Visual |
-| P0.12 | **Responsive layout** -- works on desktop (768-1920px) and does not break on mobile (graceful degradation, not full mobile optimization) | Tech |
-| P0.13 | **Typography and color system** -- DM Serif Display, Source Sans 3, JetBrains Mono. Encoder=violet/indigo, Decoder=rose/gold palette. | Visual |
+### 3.3 Grid-to-Scatter Animation
+- **V (R1):** CSS FLIP on DOM elements
+- **I (R1):** FLIP, scroll-scrubbed via GSAP
+- **T (R2):** Canvas2D — 64 DOM transforms is a compositing layer risk
+- **ALL (R3):** Accept Canvas2D
+- **RESOLUTION: Canvas2D rAF loop. Interpolate tile positions from grid to scatter coordinates. Scroll-scrubbed via GSAP ScrollTrigger (user controls animation speed by scrolling). Single compositing layer.** (Unanimous by R3)
 
-### P1 -- Should Have (implement after P0 is solid)
+### 3.4 GSAP ScrollTrigger vs. Vanilla
+- **V (R1):** No GSAP, use rAF + scrollY
+- **I (R2):** Adopt GSAP
+- **T (R1):** GSAP
+- **ALL (R3):** Adopt GSAP
+- **RESOLUTION: Use GSAP ScrollTrigger (~28KB gzip). Handles momentum scroll, resize, mobile Safari rubber-banding, and section pinning. Also drives scroll-scrubbed grid-to-scatter animation and background gradient timeline.** (Unanimous by R3)
 
-| # | Feature | Notes |
-|---|---------|-------|
-| P1.1 | **Hero sunrise animation** | Lissajous curve decoded through VAE, looping. Establishes the "wow" on page load. |
-| P1.2 | **Temperature / sampling slider** | In Act IV. Shows effect of sigma scaling on decoded output variety. |
-| P1.3 | **KL divergence visualization** | "Breathing" gaussian blobs. Beta slider shows regularization vs. reconstruction trade-off. |
-| P1.4 | **Path drawing mode** | Draw a freeform path on latent space, see decoded animation along it. Catmull-Rom interpolation. Preset paths (season arc, color gradient). |
-| P1.5 | **Find the Sunrise game** | Show a target sunrise, user clicks in latent space to find it. Distance-based scoring. 3 difficulty levels. |
-| P1.6 | **Scroll-wheel zoom** | 0.5x-3x zoom on latent canvas. Recenter on pointer. |
-| P1.7 | **Animated grain texture overlay** | Subtle film-grain across the page. Pure CSS or tiny canvas. |
-| P1.8 | **Scrubbable numeric values** | All displayed numbers (coordinates, loss values, temperature) are click-and-drag adjustable. |
-| P1.9 | **Mobile-optimized interactions** | Touch-friendly latent canvas, swipe between pinned sunrises, responsive sticky sections. |
-| P1.10 | **Encode mode verification** | After encoding, user can drag the encoded point and see how decoded output diverges from original. |
+### 3.5 Font
+- **V (R1):** Inter
+- **I (R1):** Source Sans 3
+- **V (R3):** Accepts Source Sans 3 (better readability at body text sizes, warmth carried by color palette instead)
+- **I (R3):** Accepts Inter (better tabular numbers for coordinate displays)
+- **RESOLUTION: Inter for body text.** (V and I swapped positions; both accept either. Inter chosen for its superior tabular number support, which matters for the scrubbable coordinate displays that appear throughout.)
 
-### P2 -- Nice to Have
+### 3.6 Mobile Touch Interaction
+- **I (R1):** Single-finger decode, two-finger scroll
+- **T (R2):** Explicit "Tap to explore" mode switch
+- **V (R3):** Accepts T's mode switch
+- **I (R3):** Accepts T's mode switch
+- **T (R3):** Accepts I's single-finger/two-finger model
+- **RESOLUTION: Explicit mode switch for P0.** Two agents (V, I) agreed on mode switch vs. one (T) who reversed. On mobile, canvas starts in scroll-through mode. A "Tap to explore" button toggles `touch-action: none`, enabling single-finger decode. "Done exploring" exits the mode. This avoids the unsolved gesture disambiguation problem.
 
-| # | Feature | Notes |
-|---|---------|-------|
-| P2.1 | Latent Space Cartographer game | Explore 25 regions, collect stamps. |
-| P2.2 | Pinch-to-zoom with minimap | Full multi-scale navigation. |
-| P2.3 | Density visualization overlays | Prior, aggregate posterior, clean modes. |
-| P2.4 | Semantic region labels | Auto-detected clusters labeled ("winter dawn", "tropical sunset", etc.). |
-| P2.5 | Slerp interpolation toggle | Alternative to linear interp. |
-| P2.6 | Single-HTML build target | Base64-encode all assets into one file. |
-| P2.7 | Auto-playing filmstrip time-lapses | For seasonal variation demonstration. |
-| P2.8 | Projector mode (>1920px) | Large-screen layout for presentations. |
+### 3.7 Quantization
+- **V (R2):** Float16 (strongly — uint8 causes visible banding in sky gradients)
+- **I (R2):** Float16
+- **T (R1):** Float16
+- **RESOLUTION: Float16. Non-negotiable.** Sunrise images are 90% smooth gradients by pixel area. Uint8 quantization maps 256 discrete levels per weight, introducing visible banding. Float16 is perceptually lossless. Model size: ~400KB (vs ~200KB uint8). Well within budget.
+
+### 3.8 Encoder Animation: Scroll-Scrubbed vs. Fire-Once
+- **I (R2):** Scroll-scrubbed (user controls particle convergence by scrolling)
+- **I (R3):** Revised to fire-once (reversing particles on back-scroll is complex and uncanny)
+- **T (R3):** Fire-once on section enter
+- **RESOLUTION: Fire-once play animation, triggered by IntersectionObserver when Act III enters viewport.** Grid-to-scatter is scroll-scrubbed; encoder particles are not.
+
+### 3.9 First Touch Ripple
+- **V (R1):** Concentric rings from cursor on first touch
+- **I (R2):** Cut it — competes with decoded image
+- **V (R3):** Accepts I. Cut.
+- **RESOLUTION: Cut.** The decoded image appearing IS the first touch moment.
+
+### 3.10 Sprite Atlas Grid Size
+- **T (R1):** 32×32 (2048×2048px)
+- **V (R2):** 24×24 (1536×1536px) — safer for mobile GPU texture limits
+- **T (R3):** Accepts 24×24
+- **RESOLUTION: 24×24 grid at 64px per cell = 1536×1536 WebP (~150KB).** Under the 2048px MAX_TEXTURE_SIZE limit of older iOS devices.
+
+### 3.11 Decode API: Sync vs. Async
+- **T (R1):** `dataSync()` (faster for small tensors)
+- **V (R2):** `data()` async (protects main thread from stalls)
+- **T (R3):** Accepts async `data()` with double buffering
+- **RESOLUTION: Async `data()` with double-buffered canvas.** Protects scroll and cursor smoothness from GPU readback stalls on cold/slow devices.
+
+---
+
+## 4. Final Feature List
+
+### P0 — Launch Requirements
+
+| # | Feature | Details |
+|---|---------|---------|
+| P0.1 | **Scrollytelling skeleton** | 5 `<section>` elements, GSAP ScrollTrigger for section pinning and progress tracking |
+| P0.2 | **Background gradient** | 8-stop gradient from #0B0E1A to #FFF8F0, driven by GSAP timeline scrubbed to scroll position |
+| P0.3 | **"First Pixel" hero** | Single dot blooms to 256×256 sunrise over 1400ms (blur(20px→0px), scale(1→256)), ease-out-expo |
+| P0.4 | **Sunrise grid → scatter** | ~64 thumbnails in Canvas2D. GSAP scroll-scrubbed tween from grid positions to latent-space positions. |
+| P0.5 | **Latent space canvas** | 500×500 Canvas2D + SVG overlay for axes/labels. Training point dots from latent_coords.json. |
+| P0.6 | **Hover-to-decode** | Pointer over canvas → decode at 30fps via rAF gate → display 256×256 in adjacent panel. Crosshair + coordinate readout. |
+| P0.7 | **Click-to-pin** | Up to 4 pins, numbered, color-coded (decoder warm palette). Each shows 48×48 thumbnail + coordinates. |
+| P0.8 | **Interpolation slider** | Select 2 pins → line drawn between them → slider morphs decoded image. `z_interp = (1-t)*z_A + t*z_B`. |
+| P0.9 | **Encoder particle animation** | Fire-once on Act III enter. 3 phases: decomposition (600ms), flight (800ms), convergence (600ms). ~200 particles via Canvas2D. Particles carry source pixel colors, blend to encoder violet (#6C5CE7) during flight. |
+| P0.10 | **TF.js decoder** | Float16 quantized, ~400KB. Async `data()` with double-buffer. 3 warmup inferences on load. |
+| P0.11 | **Sprite atlas fallback** | 24×24 grid, 1536×1536 WebP (~150KB). Bilinear interpolation. Auto-engaged if WebGL unavailable or decode > 33ms for 3 frames. |
+| P0.12 | **Progressive disclosure** | 5 expandable `<details>` annotations: latent space, decoder, encoder, reconstruction loss, KL divergence. KaTeX renders lazily on expand. |
+| P0.13 | **Responsive layout** | Desktop: two-column sticky (text left, canvas right). Mobile: single column, no sticky, explicit "Tap to explore" mode switch. |
+| P0.14 | **Typography + color system** | DM Serif Display / Inter / JetBrains Mono. Encoder=cool (#6C8EBF), Decoder=warm (#D4845A). |
+
+### P1 — Should Have
+
+| # | Feature |
+|---|---------|
+| P1.1 | Hero Lissajous animation (looping decode path on load) |
+| P1.2 | Temperature / sampling slider with filmstrip of 8 batched decodes |
+| P1.3 | KL divergence visualization — breathing gaussians, beta slider tug-of-war |
+| P1.4 | Path drawing — Catmull-Rom splines, preset paths, animated playback |
+| P1.5 | "Find the Sunrise" game — 3 guesses, distance scoring, 3 difficulty levels, localStorage |
+| P1.6 | Scrubbable numeric values (Bret Victor style) — all displayed numbers drag-adjustable |
+| P1.7 | Post-encoding drag verification — drag encoded point, see reconstruction degrade |
+| P1.8 | Film grain overlay (CSS tiled PNG, `pointer-events: none`) |
+| P1.9 | Scroll-wheel zoom on latent canvas (0.5x-3x) |
+| P1.10 | "Ghost sunrise" souvenir — user's last decoded image displayed in Act V reflection |
+
+### P2 — Nice to Have
+
+| # | Feature |
+|---|---------|
+| P2.1 | Cursor trail (3-position, linear fade, disabled on latent canvas) |
+| P2.2 | Latent Space Cartographer game |
+| P2.3 | Pinch-to-zoom with minimap |
+| P2.4 | Density visualization overlays (prior, aggregate posterior) |
+| P2.5 | Semantic region labels ("winter dawn", "summer noon") |
+| P2.6 | Slerp interpolation toggle |
+| P2.7 | Single-HTML build target (base64 assets) |
+| P2.8 | Projector mode (>1920px) |
+| P2.9 | WebGL2 particle system (upgrade from Canvas2D if needed) |
 
 ---
 
 ## 5. Technical Specification
 
-### 5.1 File Structure
+### 5.1 Technology Stack (converged)
+
+| Library | Version | Size (gzip) | Purpose |
+|---------|---------|-------------|---------|
+| TensorFlow.js | 4.22+ | ~330KB (core + webgl) | VAE decoder inference |
+| GSAP + ScrollTrigger | 3.12+ | ~36KB | Scroll-driven animations, section pinning |
+| D3.js (micro) | 7.x (d3-scale, d3-interpolate) | ~12KB | Axis scales, color interpolation |
+| KaTeX | 0.16+ | ~80KB | Math rendering (lazy-loaded) |
+| No framework | — | 0KB | Vanilla JS, IIFE modules |
+
+**Total JS: ~458KB gzip.** Total first load with assets: ~1.1MB.
+
+### 5.2 File Structure
 
 ```
-index.html              -- Main (and only) HTML file. All CSS is inlined in <style>. All JS is inlined in <script>.
+index.html                  -- HTML + inlined CSS + inlined JS
 assets/
   model/
-    decoder.json        -- TF.js model topology
-    decoder.bin         -- Quantized int8 weights (~200KB)
+    decoder.json            -- TF.js model topology (~3KB)
+    decoder.bin             -- Float16 weights (~400KB)
   sprites/
-    atlas.png           -- 20x20 pre-computed decoded grid (~300KB)
+    atlas.webp              -- 24×24 grid, 1536×1536 (~150KB)
   data/
-    latent_coords.json  -- (mu, logvar) for all training images (~50KB)
-    thumbnails.png       -- Sprite sheet of training image thumbnails (~500KB)
+    latent_coords.json      -- {z, sun_x, sun_y} per training image (~30KB)
+    thumbnails.webp         -- Sprite sheet of training thumbnails (~300KB)
 ```
 
-**Total first-load budget: ~1.2MB** (excluding CDN-hosted libraries and fonts).
-
-### 5.2 CDN Dependencies
+### 5.3 CDN Dependencies
 
 ```html
-<!-- TensorFlow.js -- WebGL backend only, no WASM -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.x/dist/tf.min.js"></script>
+<!-- TF.js -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.22.0/dist/tf-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl@4.22.0/dist/tf-backend-webgl.min.js"></script>
 
-<!-- D3.js -- cherry-picked modules only -->
-<script src="https://cdn.jsdelivr.net/npm/d3-scale@4"></script>
-<script src="https://cdn.jsdelivr.net/npm/d3-axis@3"></script>
-<script src="https://cdn.jsdelivr.net/npm/d3-selection@3"></script>
-<script src="https://cdn.jsdelivr.net/npm/d3-transition@3"></script>
-<script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3"></script>
-<script src="https://cdn.jsdelivr.net/npm/d3-ease@3"></script>
+<!-- GSAP + ScrollTrigger -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 
-<!-- KaTeX for math rendering -->
+<!-- D3 micro-modules -->
+<script src="https://cdn.jsdelivr.net/npm/d3-scale@4.0.2/dist/d3-scale.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3.0.1/dist/d3-interpolate.min.js"></script>
+
+<!-- KaTeX (deferred) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css">
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"></script>
 
 <!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 ```
 
-### 5.3 Core Architecture (in index.html)
+### 5.4 Rendering Architecture
 
-The JS is organized into these modules (all in one `<script>` block, separated by comments):
+**2 layers (converged):**
+
+1. **Canvas2D** (`latentCanvas`) — all pixel rendering: training point dots, hover-decoded image preview, pinned thumbnails, particle effects, grid/scatter tiles. Single compositing layer. Updates at up to 60fps during interaction.
+2. **SVG overlay** — axes, labels, coordinate readout, crosshair lines, pin numbers. DOM-based for accessibility and crisp text at any zoom. Updates only on value change.
+
+Pointer events captured on a transparent overlay div, dispatched to appropriate handlers based on current Act and interaction state.
+
+### 5.5 Core Code Architecture
 
 ```
-// ═══════════════════════════════════════
-// MODULE: Config & Constants
-// ═══════════════════════════════════════
-// Color palette, breakpoints, timing constants, latent space bounds
-
-// ═══════════════════════════════════════
-// MODULE: State Management
-// ═══════════════════════════════════════
-// Single state object. No framework. Event emitter pattern for reactivity.
-//
-// state = {
-//   scrollProgress: 0-1,
-//   currentAct: 1-5,
-//   latentCursor: {x, y},
-//   pinnedPoints: [],        // max 4
-//   interpolationT: 0-1,
-//   temperature: 1.0,
-//   beta: 1.0,
-//   decodedImage: ImageData,
-//   modelReady: false,
-//   useSpriteFallback: false,
-// }
-
-// ═══════════════════════════════════════
-// MODULE: Model & Inference
-// ═══════════════════════════════════════
-// loadDecoder()        -- loads TF.js model, runs warmup inference
-// decode(z)            -- returns ImageData from latent vector [z1, z2]
-// decodeFromAtlas(z)   -- bilinear interpolation from sprite atlas
-// decodeAuto(z)        -- tries TF.js, falls back to atlas
-// encode(imageData)    -- if encoder is loaded (P1), returns {mu, logvar}
-// Wraps all TF calls in tf.tidy(). Uses double-buffer pattern for canvas.
-
-// ═══════════════════════════════════════
-// MODULE: Rendering -- Canvas
-// ═══════════════════════════════════════
-// Two canvases layered:
-//   1. imageCanvas  -- decoded sunrise images, particle effects, thumbnails
-//   2. uiCanvas (SVG overlay) -- axes, labels, pinned point markers, paths
-//
-// renderLatentSpace()  -- draws training points as dots, pinned points, cursor
-// renderDecodedPanel() -- draws the large decoded image beside the latent canvas
-// renderParticles()    -- encoder particle animation (requestAnimationFrame loop)
-// renderGrid()         -- Act I sunrise thumbnail grid
-
-// ═══════════════════════════════════════
-// MODULE: Scroll Controller
-// ═══════════════════════════════════════
-// Intersection Observer on each <section data-act="N">
-// Updates state.scrollProgress and state.currentAct
-// Triggers background gradient transition via CSS custom property:
-//   document.documentElement.style.setProperty('--scroll-progress', progress)
-// Background gradient defined in CSS using the custom property.
-
-// ═══════════════════════════════════════
-// MODULE: Interaction Handlers
-// ═══════════════════════════════════════
-// Uses PointerEvents (unified mouse + touch) throughout.
-// pointerMove on latent canvas -> update state.latentCursor -> decode -> render
-// pointerDown on latent canvas -> pin point
-// Slider for interpolation -> update state.interpolationT -> decode lerp -> render
-// All interactions throttled to 33ms (30fps) via requestAnimationFrame gate.
-
-// ═══════════════════════════════════════
-// MODULE: Animations
-// ═══════════════════════════════════════
-// heroAnimation()      -- Lissajous loop through latent space (P1)
-// gridToScatter()      -- FLIP animation: thumbnails morph from grid to scatter
-// encoderParticles()   -- image -> particles -> convergence to (mu) point
-// klBreathing()        -- gaussian contours pulsing (P1)
-// All animations use requestAnimationFrame. No GSAP (unnecessary dependency).
-
-// ═══════════════════════════════════════
-// MODULE: Progressive Disclosure
-// ═══════════════════════════════════════
-// <details> elements with custom styling for expandable annotations.
-// KaTeX renders on-demand (when annotation is opened) to avoid upfront cost.
-// Three layers: data-depth="intuitive|technical|deep"
-
-// ═══════════════════════════════════════
-// MODULE: Init
-// ═══════════════════════════════════════
-// 1. Load sprite atlas (fast, ~300KB)
-// 2. Begin TF.js model load in parallel
-// 3. Render Act I immediately using sprite data
-// 4. On model ready, enable real-time decode, run warmup
-// 5. Set up scroll observer, pointer handlers
+// MODULE: Config          — palette, breakpoints, latent bounds, timing
+// MODULE: State           — reactive pub/sub on plain object (~30 lines)
+// MODULE: Capabilities    — WebGL2 detection, device memory, touch detection
+// MODULE: ModelManager    — TF.js load, warmup, async decode with double buffer
+// MODULE: SpriteAtlas     — atlas load, bilinear interpolation lookup
+// MODULE: Renderer        — Canvas2D + SVG management, draw loops
+// MODULE: ScrollController — GSAP ScrollTrigger setup, background gradient timeline
+// MODULE: Interactions    — PointerEvents (unified mouse+touch), pin/drag/hover
+// MODULE: Animations      — gridToScatter, encoderParticles, heroLissajous (P1)
+// MODULE: Disclosure      — <details> management, lazy KaTeX rendering
+// MODULE: App             — init, asset loading, fallback logic
 ```
 
-### 5.4 Key Code Patterns
+### 5.6 Key Code Patterns
 
-**Double-buffered decode (avoids flicker):**
+**Double-buffered async decode:**
 ```javascript
-const bufferA = new OffscreenCanvas(64, 64);
-const bufferB = new OffscreenCanvas(64, 64);
-let activeBuffer = bufferA;
+const buffers = [new OffscreenCanvas(64, 64), new OffscreenCanvas(64, 64)];
+let active = 0;
 
 async function decode(z) {
-  const inactive = activeBuffer === bufferA ? bufferB : bufferA;
-  const ctx = inactive.getContext('2d');
-  const tensor = tf.tidy(() => {
+  const back = 1 - active;
+  const ctx = buffers[back].getContext('2d');
+  const pixelData = await tf.tidy(() => {
     const input = tf.tensor2d([[z[0], z[1]]]);
-    return decoder.predict(input);
+    const output = decoder.predict(input);
+    return output.squeeze().mul(255).clipByValue(0, 255).data(); // async
   });
-  const data = await tensor.data();
-  tensor.dispose();
-  const imageData = new ImageData(new Uint8ClampedArray(data), 64, 64);
-  ctx.putImageData(imageData, 0, 0);
-  activeBuffer = inactive;
-  return activeBuffer;
+  const rgba = new Uint8ClampedArray(64 * 64 * 4);
+  for (let i = 0, j = 0; i < 64 * 64; i++, j += 3) {
+    rgba[i * 4] = pixelData[j];
+    rgba[i * 4 + 1] = pixelData[j + 1];
+    rgba[i * 4 + 2] = pixelData[j + 2];
+    rgba[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(new ImageData(rgba, 64, 64), 0, 0);
+  active = back;
+  return buffers[active];
 }
 ```
 
-**Throttled pointer handler:**
+**Throttled pointer handler (30fps):**
 ```javascript
-let frameRequested = false;
-latentCanvas.addEventListener('pointermove', (e) => {
-  state.latentCursor = screenToLatent(e.offsetX, e.offsetY);
-  if (!frameRequested) {
-    frameRequested = true;
-    requestAnimationFrame(() => {
-      decodeAndRender(state.latentCursor);
-      frameRequested = false;
+let pending = null, scheduled = false;
+canvas.addEventListener('pointermove', (e) => {
+  pending = screenToLatent(e.offsetX, e.offsetY);
+  if (!scheduled) {
+    scheduled = true;
+    requestAnimationFrame(async () => {
+      if (pending) await decodeAndRender(pending);
+      pending = null;
+      scheduled = false;
     });
   }
 });
 ```
 
-**Scroll-driven background gradient (CSS):**
-```css
-:root {
-  --scroll-progress: 0;
-}
-body {
-  background: color-mix(
-    in oklch,
-    color-mix(in oklch, #0B0E2D calc((1 - var(--scroll-progress) * 2) * 100%), #F5A623),
-    #FFF8F0 calc(max(0, var(--scroll-progress) * 2 - 1) * 100%)
-  );
-  transition: background 0.3s ease-out;
-}
-```
-Note: If `color-mix` browser support is insufficient, fall back to a JS-computed `background` style using d3-interpolate on the three color stops.
-
-**Sprite atlas bilinear interpolation:**
+**Adaptive fallback:**
 ```javascript
-function decodeFromAtlas(z, atlas, ctx) {
-  // z in [-3, 3] mapped to atlas grid [0, 19]
-  const gx = (z[0] + 3) / 6 * 19;
-  const gy = (z[1] + 3) / 6 * 19;
-  const x0 = Math.floor(gx), y0 = Math.floor(gy);
-  const x1 = Math.min(x0 + 1, 19), y1 = Math.min(y0 + 1, 19);
-  const fx = gx - x0, fy = gy - y0;
-  // Draw 4 nearest cells with appropriate opacity for bilinear blend
-  ctx.globalAlpha = (1 - fx) * (1 - fy); ctx.drawImage(atlas, x0*64, y0*64, 64, 64, 0, 0, 64, 64);
-  ctx.globalAlpha = fx * (1 - fy);       ctx.drawImage(atlas, x1*64, y0*64, 64, 64, 0, 0, 64, 64);
-  ctx.globalAlpha = (1 - fx) * fy;       ctx.drawImage(atlas, x0*64, y1*64, 64, 64, 0, 0, 64, 64);
-  ctx.globalAlpha = fx * fy;             ctx.drawImage(atlas, x1*64, y1*64, 64, 64, 0, 0, 64, 64);
-  ctx.globalAlpha = 1;
+let slowFrames = 0;
+async function decodeAuto(z) {
+  if (state.useSpriteFallback) return SpriteAtlas.lookup(z);
+  const t0 = performance.now();
+  const result = await decode(z);
+  if (performance.now() - t0 > 33) {
+    if (++slowFrames >= 3) state.useSpriteFallback = true;
+  } else slowFrames = 0;
+  return result;
 }
 ```
 
-### 5.5 VAE Model Pipeline
-
-```
-Training (offline, not part of this repo):
-  PyTorch VAE (2-dim latent, 64x64 RGB output)
-    -> torch.onnx.export()
-    -> onnx-tf convert
-    -> tensorflowjs_converter --quantize_uint8
-    -> decoder.json + decoder.bin
-
-Sprite atlas generation (offline script):
-  Grid of 20x20 evenly spaced z values in [-3, 3]
-  Decode each, stitch into single 1280x1280 PNG
-
-Latent coordinates export:
-  Run encoder on full training set
-  Save as JSON: [{id, mu: [z1, z2], logvar: [z1, z2], thumb_idx}]
+**GSAP scroll-driven background gradient:**
+```javascript
+const colors = ['#0B0E1A','#141832','#2A1F4E','#4A2545','#7A3B2E','#C2753A','#E8A84C','#FFF8F0'];
+gsap.to({}, {
+  scrollTrigger: { trigger: '#app', start: 'top top', end: 'bottom bottom', scrub: true },
+  onUpdate() {
+    const p = this.progress();
+    const bg = d3.interpolateRgbBasis(colors)(p);
+    document.body.style.background = bg;
+  }
+});
 ```
 
-### 5.6 Responsive Strategy
+### 5.7 VAE Model Pipeline
 
-Three tiers:
+```
+PyTorch VAE (2-dim latent, 64×64 RGB output)
+  → torch.onnx.export(decoder, dummy_z, "decoder.onnx", opset_version=17)
+  → onnx-tf convert to SavedModel
+  → tensorflowjs_converter --quantize_float16 → decoder.json + decoder.bin
 
-| Tier | Width | Latent canvas | Decoded panel | Layout |
-|------|-------|--------------|---------------|--------|
-| Mobile | <768px | 300x300 | 128x128 above canvas | Single column, no sticky sections, sprite-only fallback |
-| Desktop | 768-1920px | 500x500 | 256x256 side panel | Two-column sticky layout for Acts II-IV |
-| Projector | >1920px (P2) | 700x700 | 384x384 | Scaled desktop layout |
+Sprite atlas (offline):
+  24×24 grid, z ∈ [-3, 3], decode each → stitch into 1536×1536 WebP
 
-Use CSS `clamp()` for fluid intermediate sizes. PointerEvents for unified input handling.
+Latent coordinates (offline):
+  Encode full training set → save [{z: [z1, z2], sun_x, sun_y}] as JSON
+```
 
-### 5.7 Performance Budgets
+### 5.8 Responsive Strategy
+
+| Tier | Width | Canvas | Decoded Panel | Layout |
+|------|-------|--------|---------------|--------|
+| Mobile | <768px | clamp(280px, 90vw, 400px) | 128×128 above canvas | Single column, no sticky, "Tap to explore" mode |
+| Desktop | 768–1920px | 500×500 | 256×256 side panel | Two-column sticky for Acts II–IV |
+| Projector (P2) | >1920px | 700×700 | 384×384 | Scaled desktop |
+
+### 5.9 Performance Budgets
 
 | Metric | Target |
 |--------|--------|
-| First contentful paint | < 1.5s |
-| Time to interactive (Act I visible) | < 3s |
-| Decode latency (TF.js) | < 5ms at p95 |
-| Decode latency (sprite fallback) | < 1ms |
+| First Contentful Paint | < 1.0s |
+| Time to Interactive | < 2.5s |
+| Decode latency (TF.js, p95) | < 5ms |
+| Decode latency (sprite) | < 1ms |
 | Hover-to-image update | < 33ms (30fps) |
-| Total transfer size | < 1.5MB |
-| Particle animation | 60fps with up to 200 particles |
+| Particle animation | 60fps, 200 particles |
+| Simultaneously animated layers | ≤ 3 |
+| Total transfer | < 1.2MB |
+| JS heap (steady state) | < 50MB |
+| TF.js tensor count (steady) | < 20 |
 
-### 5.8 Accessibility
+### 5.10 Capability Detection & Fallback Tiers
 
-- All interactive canvases have `role="img"` with descriptive `aria-label`
-- Pinned points announced via `aria-live="polite"` region
-- Expandable annotations use native `<details>/<summary>`
-- Color contrast ratios meet WCAG AA against the current background gradient position
-- Keyboard: Tab to latent canvas, arrow keys to move cursor, Enter to pin, Escape to unpin last
+| Tier | Condition | Behavior |
+|------|-----------|----------|
+| **Full** | WebGL2 + float32 textures + ≥2GB RAM | TF.js real-time decode |
+| **Sprite** | No WebGL2 or TF.js load failure | Sprite atlas bilinear interpolation |
+| **Canvas-only** | No WebGL at all | Sprite atlas, no particle animation |
+| **Static** | Very old browser | Pre-rendered images, no interactivity |
+
+### 5.11 Accessibility
+
+- Canvas: `role="img"`, descriptive `aria-label`, `tabindex="0"`
+- Keyboard: Tab → canvas, arrow keys move cursor (0.1 units), Shift+Arrow (0.01), Enter = pin, Escape = unpin
+- `aria-live="polite"` region announces pin/decode changes
+- `<details>/<summary>` for progressive disclosure (native, accessible)
+- `prefers-reduced-motion`: all animations instant, scroll effects become opacity toggles
+- WCAG AA contrast on all text against current gradient position
 
 ---
 
-## 6. Implementation Phases
+## 6. Color System
 
-### Phase 1: Foundation (P0.1, P0.2, P0.4, P0.9, P0.10, P0.12, P0.13)
+### Background Gradient Stops (scroll-driven)
 
-**Goal:** A scrollable page with a working latent space canvas that decodes sunrises.
+```
+  0%  #0B0E1A   Deep space navy
+ 15%  #141832   Midnight indigo
+ 30%  #2A1F4E   Pre-dawn violet
+ 45%  #4A2545   Twilight mauve
+ 55%  #7A3B2E   Sunrise ember
+ 70%  #C2753A   Golden hour amber
+ 85%  #E8A84C   Full morning gold
+100%  #FFF8F0   Warm cream daylight
+```
 
-**Deliverables:**
-- index.html with 5 `<section>` elements, scroll observer, background gradient
-- Typography and color system applied
-- Latent space canvas renders with axes (D3 SVG overlay)
-- TF.js decoder loads and decodes on click
-- Sprite atlas loads and serves as fallback
+### Semantic Tokens
+
+```
+Encoder (cool/analytical):
+  --encoder-primary:   #6C8EBF
+  --encoder-light:     #A3C1E0
+  --encoder-dark:      #3A5A8C
+
+Decoder (warm/generative):
+  --decoder-primary:   #D4845A
+  --decoder-light:     #EAAC7A
+  --decoder-dark:      #9E5A33
+
+Interactive:
+  --interactive-cursor: #FFFFFF
+  --interactive-glow:   rgba(255, 200, 120, 0.3)
+  --accent-highlight:   #F2C94C
+
+Text on dark BG:  #E8E4DF (body), #FFFFFF (headings), rgba(232,228,223,0.55) (muted)
+Text on light BG: #1A1A2E (body), #0B0E1A (headings)
+
+Code/coordinates: #00CEC9 (on dark), #6C5CE7 (on light)
+```
+
+---
+
+## 7. Typography
+
+```
+Headlines:     'DM Serif Display', serif       clamp(2rem, 5vw, 4rem)
+Body:          'Inter', sans-serif             clamp(1rem, 1.5vw, 1.25rem)  line-height: 1.7  max-width: 65ch
+Coordinates:   'JetBrains Mono', monospace     0.875em
+Math:          KaTeX, inline or display-block
+```
+
+Key term treatment: first occurrence highlighted in `--accent-highlight` (#F2C94C) with `border-bottom: 1px dashed`, tooltip on hover with one-sentence definition.
+
+---
+
+## 8. Implementation Phases
+
+### Phase 1: Foundation
+**Goal:** Scrollable page + working latent canvas + decode on click.
+
+- index.html with 5 sections, GSAP ScrollTrigger, background gradient
+- Typography and color system
+- Canvas2D + SVG overlay rendering latent space with axes
+- TF.js decoder loads, warmup, decode on click
+- Sprite atlas fallback
 - Responsive: does not break at any width
 
-**Exit criteria:** User can open the page, scroll through 5 sections with gradient shift, click anywhere on the latent canvas in Act II, and see a decoded sunrise image.
+**Exit:** User scrolls through gradient, clicks latent canvas, sees decoded sunrise.
 
-### Phase 2: Core Interactions (P0.3, P0.5, P0.6, P0.7, P0.8, P0.11)
+### Phase 2: Core Interactions
+**Goal:** All interactive teaching moments work.
 
-**Goal:** All the interactive teaching moments work.
+- Grid-to-scatter scroll-scrubbed Canvas2D animation
+- Hover-to-decode at 30fps
+- Click-to-pin (up to 4)
+- Interpolation slider between pin pairs
+- Encoder particle animation (fire-once, 200 particles, Canvas2D)
+- 5 progressive disclosure annotations with KaTeX
 
-**Deliverables:**
-- Act I: Grid of thumbnails with FLIP animation to scatter plot
-- Act II: Hover-to-decode at 30fps, click-to-pin (up to 4), linear interpolation slider
-- Act III: Encoder particle animation (select image, particles converge to latent point)
-- Progressive disclosure annotations with KaTeX math on at least 5 key concepts (latent space, encoder, decoder, reconstruction loss, KL divergence)
+**Exit:** A non-ML-background user scrolls through and can explain what a VAE does.
 
-**Exit criteria:** A user with no ML background can scroll through the page and correctly explain what a VAE does afterward.
+### Phase 3: Polish & P1
+**Goal:** The "wow" factor. Hacker News / Twitter shareable.
 
-### Phase 3: Polish & P1 Features (P1.1-P1.10)
-
-**Goal:** The "wow" factor. The page feels like a sunrise.
-
-**Deliverables:**
-- Hero Lissajous animation
-- Temperature and beta sliders with live visualization
-- KL divergence breathing animation
-- Path drawing with Catmull-Rom splines
+- Hero Lissajous, temperature/beta sliders, KL breathing
+- Path drawing with splines
 - Find the Sunrise game
-- Film grain overlay
-- Scrubbable numbers
-- Mobile touch optimization
-- Encode-and-verify mode
+- Scrubbable numbers, encode-and-verify, ghost sunrise souvenir
+- Film grain, mobile touch optimization
 
-**Exit criteria:** The page is something you would share on Twitter / Hacker News and feel proud of.
-
-### Phase 4: Extras (P2)
-
-Implement based on user feedback and interest. No formal specification needed until Phase 3 is complete.
+### Phase 4: P2 Features
+Based on user feedback after Phase 3.
 
 ---
 
-## 7. Color Reference
+## 9. 5 "Wow" Moments (converged)
 
-```
-Background gradient stops:
-  0%   scroll: #0B0E2D  (deep indigo night sky)
-  50%  scroll: #F5A623  (golden sunrise)
-  100% scroll: #FFF8F0  (warm cream daylight)
+1. **The First Pixel** — Page loads to near-black. A single point of light blooms into a full sunrise over 1.4 seconds. The thesis statement as animation: one point of information expands into a rich image.
 
-Encoder palette (cool):
-  Primary:    #6C5CE7  (violet)
-  Secondary:  #341F97  (deep indigo)
-  Accent:     #A29BFE  (light violet)
+2. **The Grid Crystallizes** — 64 sunrise thumbnails rearrange before the user's eyes from a random grid into a structured 2D scatter plot. Scroll-controlled — the user can scrub back and forth, watching order emerge from chaos.
 
-Decoder palette (warm):
-  Primary:    #E17055  (rose)
-  Secondary:  #F5A623  (gold)
-  Accent:     #FFEAA7  (pale gold)
+3. **First Touch** — The user moves their pointer over the latent canvas and a sunrise materializes in real time. No click needed. The "it's alive" moment.
 
-Interactive elements:
-  Glow:       #F5A623 with 0.4 opacity box-shadow
-  Hover:      #FDCB6E
-  Active:     #E17055
+4. **The Encoder Particle Storm** — A sunrise image shatters into 200 colored particles that stream across the screen and converge to a single glowing point in latent space. The particles carry the image's colors and gradually blend to encoder violet. Compression made visceral.
 
-Neutral text:
-  On dark BG:  #E8E8F0
-  On light BG: #2D3436
-  Muted:       #636E72
-
-Code/coordinates:
-  #00CEC9 (cyan, on dark backgrounds)
-  #6C5CE7 (violet, on light backgrounds)
-```
+5. **The Smooth Morph** — The user pins a winter dawn and a summer sunset, then drags the interpolation slider. The sunrise transforms continuously between the two — sky color flowing, sun position gliding, clouds dissolving and reforming. The proof that the latent space is meaningful.
 
 ---
 
-## 8. Typography Reference
+## 10. Open Questions
 
-```
-Headlines (Act titles, hero text):
-  font-family: 'DM Serif Display', serif
-  Sizes: clamp(2rem, 5vw, 4rem) for h1, clamp(1.5rem, 3vw, 2.5rem) for h2
-
-Body text (explanations, annotations):
-  font-family: 'Source Sans 3', sans-serif
-  Size: clamp(1rem, 1.5vw, 1.25rem)
-  Line-height: 1.65
-  Max-width: 65ch
-
-Coordinates, code, numeric values:
-  font-family: 'JetBrains Mono', monospace
-  Size: 0.875em (relative to context)
-
-Math (KaTeX):
-  Rendered inline or display-block as appropriate
-  Inherits surrounding font size
-```
+1. **Training data:** Where are the sunrise images from? How many? License? Must resolve before Phase 1.
+2. **Image resolution:** 64×64 sufficient for "wow"? If not, 128×128 adds ~400KB model weight but doubles visual quality. Decide after seeing 64×64 results.
+3. **Encoder in browser:** Fake it with pre-computed (mu, logvar) from latent_coords.json for P0/P1. Real encoder inference is P2.
 
 ---
 
-## 9. Open Questions (to resolve during implementation)
+## 11. What Makes This Design Work
 
-1. **Training data source:** Where are the sunrise images from? How many? What license? This affects the thumbnail sprite sheet and the model quality. Need to finalize before Phase 1.
-2. **Encoder in browser:** The Interaction Designer wants an encode mode (Act III). Running the encoder in TF.js is feasible but doubles the model weight download. Alternative: pre-compute all encodings and animate a "fake" encode using the known (mu, logvar) from latent_coords.json. **Recommendation:** Fake it for P0/P1. Real encoder is P2.
-3. **Image resolution:** 64x64 is the practical limit for real-time decode. Is this sufficient visual quality for the "wow" factor? If not, consider 128x128 with a slightly larger model (~800K params, still <5ms inference). Decide after seeing 64x64 results.
-4. **Scroll library:** Raw Intersection Observer vs. a lightweight scroll library (e.g., scrollama, ~2KB). Scrollama handles resize/orientation edge cases. **Recommendation:** Use scrollama for robustness, it is tiny.
+**The VAE's decoder is the rendering engine for the visualization.** The page doesn't show diagrams of what a VAE does — it IS a VAE running in real time. The user's cursor becomes the latent vector. Their scroll becomes the sunrise. Their curiosity becomes the exploration.
 
----
-
-## 10. Summary: What Makes This Design Work
-
-The three proposals are remarkably aligned. The core insight they share is that **the VAE's own decoder is the rendering engine for the visualization**. Instead of showing static diagrams of what a VAE does, the page IS a VAE doing its thing in real time. The user's pointer becomes the latent vector. Their scroll becomes the sunrise. Their curiosity becomes the exploration of latent space.
-
-The main risk is scope creep -- all three proposals are ambitious. The phasing above is designed so that Phase 1 produces a working (if minimal) teaching tool, Phase 2 makes it genuinely good, and Phase 3 makes it remarkable. Each phase is independently shippable.
+Three specialists with different priorities (beauty, pedagogy, performance) debated for three rounds and converged on a design that is:
+- **Simple enough to build:** Single HTML file, no framework, 2 canvas layers
+- **Beautiful enough to share:** Sunrise gradient page, warm color system, smooth 30fps decode
+- **Deep enough to teach:** 5-act narrative, progressive disclosure, direct manipulation
+- **Robust enough to ship:** Sprite atlas fallback, adaptive degradation, capability detection
