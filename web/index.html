@@ -148,8 +148,8 @@
       pointer-events: none;
     }
 
-    /* Act II: sticky two-column layout */
-    section[data-act="2"] {
+    /* Decoder: sticky two-column layout */
+    #act-decoder {
       min-height: 200vh;
       padding-left: 0;
       padding-right: 0;
@@ -318,8 +318,8 @@
       display: none;
     }
 
-    /* Acts III, IV, V styling */
-    section[data-act="3"] {
+    /* Encoder + Acts IV, V styling */
+    #act-encoder {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -1025,14 +1025,14 @@
       <canvas id="hero-image" width="384" height="384"></canvas>
     </div>
     <canvas id="grid-scatter-canvas" width="520" height="520"></canvas>
-    <span class="grid-axis-label" id="gs-x-label">Time of Year &rarr;</span>
-    <span class="grid-axis-label" id="gs-y-label">Time of Day &rarr;</span>
+    <span class="grid-axis-label" id="gs-x-label">Time of Day &rarr;</span>
+    <span class="grid-axis-label" id="gs-y-label">Time of Year &rarr;</span>
 
     <!-- Annotation 1: What is latent space? -->
     <details class="annotation" data-depth="intuitive">
       <summary>What is latent space? &#9656;</summary>
       <div class="annotation-content">
-        <p>A map where similar sunrises live near each other. Move a little to the right and the sunrise gets warmer; move up and it gets brighter.</p>
+        <p>A map where similar sunrises live near each other. Move a little to the right and the sunrise shifts later in the day; move up and the season warms.</p>
         <details class="annotation" data-depth="technical">
           <summary>Technical: formal definition &#9656;</summary>
           <div class="annotation-content">
@@ -1049,75 +1049,8 @@
     </details>
   </section>
 
-  <!-- ACT II: Decoder -->
-  <section data-act="2" id="act-decoder">
-    <div class="sticky-container">
-      <div class="text-column">
-        <h2>The Decoder</h2>
-        <p>
-          Somewhere inside a neural network lives a tiny world of sunrises.
-          Every point in this two-dimensional space maps to a unique image —
-          a gradient of color, light, and atmosphere.
-        </p>
-        <p>
-          The horizontal axis captures something like <em>time of year</em>:
-          cool winter blues on the left, warm summer golds on the right.
-        </p>
-        <p>
-          The vertical axis captures <em>time of day</em>:
-          deep pre-dawn darkness below, bright midday light above.
-        </p>
-        <p>
-          <strong>Hover over the canvas</strong> to decode sunrises in real time.
-          <strong>Click</strong> to pin up to 4 favorites. Pin two to interpolate between them.
-        </p>
-
-        <!-- Annotation 2: What is a decoder? -->
-        <details class="annotation" data-depth="intuitive">
-          <summary>What is a decoder? &#9656;</summary>
-          <div class="annotation-content">
-            <p>A painter that only needs two instructions. Give it two numbers and it produces a full sunrise image.</p>
-            <details class="annotation" data-depth="technical">
-              <summary>Technical: the generative model &#9656;</summary>
-              <div class="annotation-content">
-                <p>The decoder is <span class="math-inline" data-katex="p_\theta(\mathbf{x}|\mathbf{z})"></span>, a neural network that maps a latent vector <span class="math-inline" data-katex="\mathbf{z} \in \mathbb{R}^2"></span> to an image <span class="math-inline" data-katex="\mathbf{x} \in [0,1]^{32 \times 32 \times 3}"></span>. The final layer uses a Sigmoid activation to keep pixel values in [0, 1].</p>
-                <details class="annotation deep" data-depth="deep">
-                  <summary>Deep dive: architecture &#9656;</summary>
-                  <div class="annotation-content">
-                    <p>The decoder uses transposed convolutions (sometimes called "deconvolutions") to progressively upsample from a small spatial representation. Starting from the 2D latent code, a linear layer maps to a 128-channel 4&times;4 feature map, then three ConvTranspose2d layers upsample to 32&times;32. Each layer has a receptive field that grows with depth, allowing the network to capture both local texture and global structure.</p>
-                  </div>
-                </details>
-              </div>
-            </details>
-          </div>
-        </details>
-      </div>
-      <div class="canvas-column">
-        <div class="canvas-wrap">
-          <canvas id="latent-canvas"></canvas>
-          <svg id="canvas-overlay" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet"></svg>
-        </div>
-        <div id="decoded-panel">
-          <div class="decoded-row">
-            <canvas id="decoded-image" width="256" height="256"></canvas>
-            <div>
-              <div id="coord-readout">z = (0.00, 0.00)</div>
-              <div class="boundary-warning" id="boundary-warning">Leaving the learned distribution...</div>
-            </div>
-          </div>
-          <div id="interp-container">
-            <canvas id="interp-thumb-a" width="64" height="64"></canvas>
-            <input type="range" id="interp-slider" min="0" max="1" step="0.01" value="0.5">
-            <canvas id="interp-thumb-b" width="64" height="64"></canvas>
-            <span id="interp-t-value">0.50</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ACT III: Encoder -->
-  <section data-act="3" id="act-encoder">
+  <!-- ACT II: Encoder -->
+  <section data-act="2" id="act-encoder">
     <h2>The Encoder</h2>
 
     <div id="encoder-gallery">
@@ -1167,6 +1100,73 @@
         </details>
       </div>
     </details>
+  </section>
+
+  <!-- ACT III: Decoder -->
+  <section data-act="3" id="act-decoder">
+    <div class="sticky-container">
+      <div class="text-column">
+        <h2>The Decoder</h2>
+        <p>
+          Somewhere inside a neural network lives a tiny world of sunrises.
+          Every point in this two-dimensional space maps to a unique image —
+          a gradient of color, light, and atmosphere.
+        </p>
+        <p>
+          The horizontal axis captures something like <em>time of day</em>:
+          deep pre-dawn blues on the left, bright midday light on the right.
+        </p>
+        <p>
+          The vertical axis captures <em>time of year</em>:
+          cool winter tones below, warm summer golds above.
+        </p>
+        <p>
+          <strong>Hover over the canvas</strong> to decode sunrises in real time.
+          <strong>Click</strong> to pin two favorites and interpolate between them.
+        </p>
+
+        <!-- Annotation 2: What is a decoder? -->
+        <details class="annotation" data-depth="intuitive">
+          <summary>What is a decoder? &#9656;</summary>
+          <div class="annotation-content">
+            <p>A painter that only needs two instructions. Give it two numbers and it produces a full sunrise image.</p>
+            <details class="annotation" data-depth="technical">
+              <summary>Technical: the generative model &#9656;</summary>
+              <div class="annotation-content">
+                <p>The decoder is <span class="math-inline" data-katex="p_\theta(\mathbf{x}|\mathbf{z})"></span>, a neural network that maps a latent vector <span class="math-inline" data-katex="\mathbf{z} \in \mathbb{R}^2"></span> to an image <span class="math-inline" data-katex="\mathbf{x} \in [0,1]^{32 \times 32 \times 3}"></span>. The final layer uses a Sigmoid activation to keep pixel values in [0, 1].</p>
+                <details class="annotation deep" data-depth="deep">
+                  <summary>Deep dive: architecture &#9656;</summary>
+                  <div class="annotation-content">
+                    <p>The decoder uses transposed convolutions (sometimes called "deconvolutions") to progressively upsample from a small spatial representation. Starting from the 2D latent code, a linear layer maps to a 128-channel 4&times;4 feature map, then three ConvTranspose2d layers upsample to 32&times;32. Each layer has a receptive field that grows with depth, allowing the network to capture both local texture and global structure.</p>
+                  </div>
+                </details>
+              </div>
+            </details>
+          </div>
+        </details>
+      </div>
+      <div class="canvas-column">
+        <div class="canvas-wrap">
+          <canvas id="latent-canvas"></canvas>
+          <svg id="canvas-overlay" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+        <div id="decoded-panel">
+          <div class="decoded-row">
+            <canvas id="decoded-image" width="256" height="256"></canvas>
+            <div>
+              <div id="coord-readout">z = (0.00, 0.00)</div>
+              <div class="boundary-warning" id="boundary-warning">Leaving the learned distribution...</div>
+            </div>
+          </div>
+          <div id="interp-container">
+            <canvas id="interp-thumb-a" width="64" height="64"></canvas>
+            <input type="range" id="interp-slider" min="0" max="1" step="0.01" value="0.5">
+            <canvas id="interp-thumb-b" width="64" height="64"></canvas>
+            <span id="interp-t-value">0.50</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- ACT IV: Variational -->
@@ -1270,11 +1270,6 @@
         <span id="guess-count-text">Guesses: 0/3</span>
       </div>
       <div id="game-controls">
-        <select id="difficulty">
-          <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
-          <option value="hard">Hard</option>
-        </select>
         <button id="play-btn">Play</button>
         <button id="next-btn" style="display:none">Next Round</button>
       </div>
@@ -1318,8 +1313,8 @@
       ATLAS_CELL: 64,
       THUMB_COLS: 45,
       THUMB_SIZE: 32,
-      PIN_COLORS: ['#D4845A', '#F2C94C', '#E17055', '#6C8EBF'],
-      MAX_PINS: 4,
+      PIN_COLORS: ['#D4845A', '#6C8EBF'],
+      MAX_PINS: 2,
       GRID_SCATTER_COUNT: 64,
       COLORS: {
         encoderPrimary: '#6C8EBF',
@@ -1451,7 +1446,7 @@
       xLabel.setAttribute('fill', 'rgba(255,255,255,0.6)');
       xLabel.setAttribute('font-size', '12');
       xLabel.setAttribute('font-family', 'Inter, sans-serif');
-      xLabel.textContent = 'time of year \u2192';
+      xLabel.textContent = 'time of day \u2192';
       g.appendChild(xLabel);
 
       const yLabel = document.createElementNS(ns, 'text');
@@ -1462,7 +1457,7 @@
       yLabel.setAttribute('font-size', '12');
       yLabel.setAttribute('font-family', 'Inter, sans-serif');
       yLabel.setAttribute('transform', `rotate(-90, 12, ${size / 2})`);
-      yLabel.textContent = 'time of day \u2192';
+      yLabel.textContent = 'time of year \u2192';
       g.appendChild(yLabel);
 
       // Tick marks
@@ -2704,7 +2699,7 @@
     document.querySelectorAll('.progress-dot').forEach(dot => {
       dot.addEventListener('click', () => {
         const target = document.getElementById(
-          ['', 'act-hook', 'act-decoder', 'act-encoder', 'act-variational', 'act-sandbox'][parseInt(dot.dataset.target)]
+          ['', 'act-hook', 'act-encoder', 'act-decoder', 'act-variational', 'act-sandbox'][parseInt(dot.dataset.target)]
         );
         if (target) target.scrollIntoView({ behavior: 'smooth' });
       });
@@ -2969,7 +2964,6 @@
     const guessPreviewCtx = guessPreview.getContext('2d');
     const playBtn = document.getElementById('play-btn');
     const nextBtn = document.getElementById('next-btn');
-    const difficultySelect = document.getElementById('difficulty');
     const gameFeedback = document.getElementById('game-feedback');
     const distanceMeter = document.getElementById('distance-meter');
     const scoreText = document.getElementById('score-text');
@@ -3012,10 +3006,8 @@
         gameCtx.beginPath(); gameCtx.moveTo(0, y); gameCtx.lineTo(w, y); gameCtx.stroke();
       }
 
-      const diff = difficultySelect.value;
-
-      // Training points (not on hard)
-      if (diff !== 'hard' && state.latentCoords) {
+      // Training points
+      if (state.latentCoords) {
         state.latentCoords.forEach(pt => {
           const cx = gameXScale(pt.z[0]);
           const cy = gameYScale(pt.z[1]);
@@ -3025,39 +3017,25 @@
           gameCtx.fill();
         });
       }
-
-      // Easy: faint halo around target
-      if (diff === 'easy' && gameState.targetZ) {
-        const tx = gameXScale(gameState.targetZ[0]);
-        const ty = gameYScale(gameState.targetZ[1]);
-        const grad = gameCtx.createRadialGradient(tx, ty, 0, tx, ty, 60);
-        grad.addColorStop(0, 'rgba(242, 201, 76, 0.12)');
-        grad.addColorStop(1, 'rgba(242, 201, 76, 0)');
-        gameCtx.fillStyle = grad;
-        gameCtx.fillRect(0, 0, w, h);
-      }
     }
 
     function drawGameOverlay() {
       const ns = 'http://www.w3.org/2000/svg';
       gameOverlay.innerHTML = '';
-      const diff = difficultySelect.value;
 
-      // Axis labels (not on hard)
-      if (diff !== 'hard') {
-        const xLabel = document.createElementNS(ns, 'text');
-        xLabel.setAttribute('x', 200); xLabel.setAttribute('y', 395);
-        xLabel.setAttribute('text-anchor', 'middle'); xLabel.setAttribute('fill', 'rgba(255,255,255,0.4)');
-        xLabel.setAttribute('font-size', '10'); xLabel.textContent = 'z\u2081';
-        gameOverlay.appendChild(xLabel);
+      // Axis labels
+      const xLabel = document.createElementNS(ns, 'text');
+      xLabel.setAttribute('x', 200); xLabel.setAttribute('y', 395);
+      xLabel.setAttribute('text-anchor', 'middle'); xLabel.setAttribute('fill', 'rgba(255,255,255,0.4)');
+      xLabel.setAttribute('font-size', '10'); xLabel.textContent = 'z\u2081';
+      gameOverlay.appendChild(xLabel);
 
-        const yLabel = document.createElementNS(ns, 'text');
-        yLabel.setAttribute('x', 8); yLabel.setAttribute('y', 200);
-        yLabel.setAttribute('text-anchor', 'middle'); yLabel.setAttribute('fill', 'rgba(255,255,255,0.4)');
-        yLabel.setAttribute('font-size', '10'); yLabel.setAttribute('transform', 'rotate(-90, 8, 200)');
-        yLabel.textContent = 'z\u2082';
-        gameOverlay.appendChild(yLabel);
-      }
+      const yLabel = document.createElementNS(ns, 'text');
+      yLabel.setAttribute('x', 8); yLabel.setAttribute('y', 200);
+      yLabel.setAttribute('text-anchor', 'middle'); yLabel.setAttribute('fill', 'rgba(255,255,255,0.4)');
+      yLabel.setAttribute('font-size', '10'); yLabel.setAttribute('transform', 'rotate(-90, 8, 200)');
+      yLabel.textContent = 'z\u2082';
+      gameOverlay.appendChild(yLabel);
 
       // Draw guess pins
       gameState.guesses.forEach((g, i) => {
@@ -3291,11 +3269,11 @@
       decodeToCanvas(z1, z2, souvenirCanvas.getContext('2d'), 256);
       souvenirCoord.textContent = `z = (${z1.toFixed(2)}, ${z2.toFixed(2)})`;
 
-      // Map z1 to season, z2 to time-of-day
+      // Map z1 to time-of-day, z2 to season
       const seasons = ['Deep winter', 'Late winter', 'Early spring', 'Spring', 'Late spring', 'Early summer', 'Summer', 'Late summer', 'Early autumn', 'Autumn', 'Late autumn', 'Early winter'];
       const times = ['Pre-dawn', 'Dawn', 'Early morning', 'Morning', 'Late morning', 'Midday'];
-      const si = Math.max(0, Math.min(seasons.length - 1, Math.round((z1 + 3) / 6 * (seasons.length - 1))));
-      const ti = Math.max(0, Math.min(times.length - 1, Math.round((z2 + 3) / 6 * (times.length - 1))));
+      const ti = Math.max(0, Math.min(times.length - 1, Math.round((z1 + 3) / 6 * (times.length - 1))));
+      const si = Math.max(0, Math.min(seasons.length - 1, Math.round((z2 + 3) / 6 * (seasons.length - 1))));
       souvenirLabel.textContent = `${times[ti]}, ${seasons[si].toLowerCase()}`;
 
       souvenirDiv.classList.add('visible');
