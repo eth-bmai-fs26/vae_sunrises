@@ -822,8 +822,8 @@
     #game-latent-canvas {
       border-radius: 8px;
       cursor: crosshair;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #1A1A2E;
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     #game-overlay {
@@ -2077,6 +2077,65 @@
     let gridPositions = [];
     let scatterPositions = [];
     let tileIndices = [];
+    let gsXScale = null;
+    let gsYScale = null;
+
+    function drawScatterBackdrop(opacity) {
+      if (opacity <= 0 || !gsXScale || !gsYScale) return;
+      const ctx = gridScatterCtx;
+      const left = gsXScale(-3);
+      const right = gsXScale(3);
+      const top = gsYScale(3);
+      const bottom = gsYScale(-3);
+      const ticks = [-2, -1, 0, 1, 2];
+
+      ctx.save();
+      ctx.globalAlpha = opacity;
+
+      // Faint grid lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1;
+      ticks.forEach(z => {
+        const xc = gsXScale(z);
+        ctx.beginPath();
+        ctx.moveTo(xc, top);
+        ctx.lineTo(xc, bottom);
+        ctx.stroke();
+        const yc = gsYScale(z);
+        ctx.beginPath();
+        ctx.moveTo(left, yc);
+        ctx.lineTo(right, yc);
+        ctx.stroke();
+      });
+
+      // Axis lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(left, bottom);
+      ctx.lineTo(right, bottom);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(left, top);
+      ctx.lineTo(left, bottom);
+      ctx.stroke();
+
+      // Tick labels
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.font = '10px JetBrains Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ticks.forEach(z => {
+        ctx.fillText(z.toString(), gsXScale(z), bottom + 4);
+      });
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ticks.forEach(z => {
+        ctx.fillText(z.toString(), left - 4, gsYScale(z));
+      });
+
+      ctx.restore();
+    }
 
     function setupGridScatter() {
       if (!state.latentCoords || !state.thumbnailsLoaded) return;
@@ -2089,11 +2148,17 @@
       const tileSize = 32;
       const padding = 40;
 
-      // Pick evenly-spaced indices from the dataset
+      // Pick evenly-spaced indices from the dataset, then shuffle so the
+      // initial 8x8 grid looks visually random rather than ordered by
+      // latent coordinate.
       tileIndices = [];
       const step = Math.floor(state.latentCoords.length / count);
       for (let i = 0; i < count; i++) {
         tileIndices.push(i * step);
+      }
+      for (let i = tileIndices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [tileIndices[i], tileIndices[j]] = [tileIndices[j], tileIndices[i]];
       }
 
       // Grid positions (centered 8x8)
@@ -2110,8 +2175,8 @@
       }
 
       // Scatter positions (z mapped to canvas)
-      const gsXScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([padding, canvasW - padding]);
-      const gsYScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([canvasH - padding, padding]);
+      gsXScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([padding, canvasW - padding]);
+      gsYScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([canvasH - padding, padding]);
 
       scatterPositions = [];
       for (let i = 0; i < count; i++) {
@@ -2130,6 +2195,10 @@
       const w = gridScatterCanvas.width;
       const h = gridScatterCanvas.height;
       gridScatterCtx.clearRect(0, 0, w, h);
+
+      // Backdrop fades in alongside the labels during the second half
+      const backdropOpacity = Math.max(0, (t - 0.5) * 2);
+      drawScatterBackdrop(backdropOpacity);
 
       if (!state.thumbnailsLoaded || !state.thumbnailsImage) return;
 
@@ -3088,7 +3157,7 @@
       gameCtx.clearRect(0, 0, w, h);
 
       // Grid
-      gameCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      gameCtx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
       gameCtx.lineWidth = 1;
       for (let t = -3; t <= 3; t++) {
         const x = gameXScale(t); const y = gameYScale(t);
@@ -3102,8 +3171,8 @@
           const cx = gameXScale(pt.z[0]);
           const cy = gameYScale(pt.z[1]);
           gameCtx.beginPath();
-          gameCtx.arc(cx, cy, 1.5, 0, Math.PI * 2);
-          gameCtx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+          gameCtx.arc(cx, cy, 1.8, 0, Math.PI * 2);
+          gameCtx.fillStyle = 'rgba(255, 255, 255, 0.35)';
           gameCtx.fill();
         });
       }
@@ -3115,16 +3184,18 @@
 
       // Axis labels
       const xLabel = document.createElementNS(ns, 'text');
-      xLabel.setAttribute('x', 200); xLabel.setAttribute('y', 395);
-      xLabel.setAttribute('text-anchor', 'middle'); xLabel.setAttribute('fill', 'rgba(255,255,255,0.4)');
-      xLabel.setAttribute('font-size', '10'); xLabel.textContent = 'z\u2081';
+      xLabel.setAttribute('x', 200); xLabel.setAttribute('y', 394);
+      xLabel.setAttribute('text-anchor', 'middle'); xLabel.setAttribute('fill', 'rgba(255,255,255,0.65)');
+      xLabel.setAttribute('font-size', '11'); xLabel.setAttribute('font-family', 'Inter, sans-serif');
+      xLabel.textContent = 'time of day \u2192';
       gameOverlay.appendChild(xLabel);
 
       const yLabel = document.createElementNS(ns, 'text');
-      yLabel.setAttribute('x', 8); yLabel.setAttribute('y', 200);
-      yLabel.setAttribute('text-anchor', 'middle'); yLabel.setAttribute('fill', 'rgba(255,255,255,0.4)');
-      yLabel.setAttribute('font-size', '10'); yLabel.setAttribute('transform', 'rotate(-90, 8, 200)');
-      yLabel.textContent = 'z\u2082';
+      yLabel.setAttribute('x', 10); yLabel.setAttribute('y', 200);
+      yLabel.setAttribute('text-anchor', 'middle'); yLabel.setAttribute('fill', 'rgba(255,255,255,0.65)');
+      yLabel.setAttribute('font-size', '11'); yLabel.setAttribute('font-family', 'Inter, sans-serif');
+      yLabel.setAttribute('transform', 'rotate(-90, 10, 200)');
+      yLabel.textContent = 'time of year \u2192';
       gameOverlay.appendChild(yLabel);
 
       // Draw guess pins
