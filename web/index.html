@@ -2134,6 +2134,18 @@
         ctx.fillText(z.toString(), left - 4, gsYScale(z));
       });
 
+      // Training-set scatter points (the full latent cloud)
+      if (state.latentCoords) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+        state.latentCoords.forEach(coord => {
+          const cx = gsXScale(coord.z[0]);
+          const cy = gsYScale(coord.z[1]);
+          ctx.beginPath();
+          ctx.arc(cx, cy, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
       ctx.restore();
     }
 
