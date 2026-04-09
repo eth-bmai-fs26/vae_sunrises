@@ -110,7 +110,7 @@
     }
 
     section[data-act="1"] {
-      min-height: 200vh;
+      min-height: 130vh;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -133,8 +133,20 @@
     }
 
     /* Grid-to-scatter canvas */
-    #grid-scatter-canvas {
+    .scatter-stage {
+      position: relative;
       margin-top: 3rem;
+      width: 520px;
+      max-width: 90vw;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #grid-scatter-canvas {
+      width: 100%;
+      height: 100%;
       border-radius: 8px;
     }
 
@@ -146,6 +158,19 @@
       opacity: 0;
       transition: opacity 0.3s;
       pointer-events: none;
+    }
+
+    #gs-x-label {
+      bottom: -1.75rem;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    #gs-y-label {
+      top: 50%;
+      left: -1.75rem;
+      transform: translateY(-50%) rotate(-90deg);
+      transform-origin: center;
     }
 
     /* Decoder: sticky two-column layout */
@@ -1024,9 +1049,11 @@
     <div id="hero-lissajous">
       <canvas id="hero-image" width="384" height="384"></canvas>
     </div>
-    <canvas id="grid-scatter-canvas" width="520" height="520"></canvas>
-    <span class="grid-axis-label" id="gs-x-label">Time of Day &rarr;</span>
-    <span class="grid-axis-label" id="gs-y-label">Time of Year &rarr;</span>
+    <div class="scatter-stage" id="scatter-stage">
+      <canvas id="grid-scatter-canvas" width="520" height="520"></canvas>
+      <span class="grid-axis-label" id="gs-x-label">Time of Day &rarr;</span>
+      <span class="grid-axis-label" id="gs-y-label">Time of Year &rarr;</span>
+    </div>
 
     <!-- Annotation 1: What is latent space? -->
     <details class="annotation" data-depth="intuitive">
@@ -2134,33 +2161,25 @@
       const yLabel = document.getElementById('gs-y-label');
 
       ScrollTrigger.create({
-        trigger: '#act-hook',
-        start: 'top top',
-        end: 'bottom top',
+        trigger: '#scatter-stage',
+        start: 'center center',
+        end: '+=80%',
+        pin: true,
+        pinSpacing: true,
         scrub: 1,
         onUpdate: (self) => {
-          const t = self.progress;
+          // Animation completes at 60% of the pinned scroll, then holds the
+          // final clustered state for the remaining 40% so the user actually
+          // sees the result before scrolling out.
+          const t = Math.min(1, self.progress / 0.6);
           renderTiles(t);
 
-          // Fade in axis labels during scatter phase
+          // Fade axis labels in during the second half of the animation
           const labelOpacity = Math.max(0, (t - 0.5) * 2);
           if (xLabel) xLabel.style.opacity = labelOpacity;
           if (yLabel) yLabel.style.opacity = labelOpacity;
         },
       });
-
-      // Position axis labels relative to canvas
-      if (xLabel && yLabel) {
-        const rect = gridScatterCanvas.getBoundingClientRect();
-        const section = document.getElementById('act-hook');
-        const sRect = section.getBoundingClientRect();
-        xLabel.style.bottom = '15vh';
-        xLabel.style.left = '50%';
-        xLabel.style.transform = 'translateX(-50%)';
-        yLabel.style.top = '40vh';
-        yLabel.style.left = 'calc(50% - 280px)';
-        yLabel.style.transform = 'rotate(-90deg)';
-      }
     }
 
     /* ============================================
@@ -2181,6 +2200,90 @@
 
     let selectedGalleryIdx = null;
     let encoderAnimRunning = false;
+
+    // Latent-space scales for the encoder canvas (must match runEncoderAnimation)
+    const ENC_ANIM_W = encoderAnimCanvas.width;
+    const ENC_ANIM_H = encoderAnimCanvas.height;
+    const encAnimXScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([50, ENC_ANIM_W - 20]);
+    const encAnimYScale = d3.scaleLinear().domain(CONFIG.LATENT_RANGE).range([ENC_ANIM_H - 20, 50]);
+
+    function drawEncoderBackdrop() {
+      encoderAnimCtx.clearRect(0, 0, ENC_ANIM_W, ENC_ANIM_H);
+      encoderAnimCtx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+      encoderAnimCtx.fillRect(0, 0, ENC_ANIM_W, ENC_ANIM_H);
+
+      const left = encAnimXScale(-3);
+      const right = encAnimXScale(3);
+      const top = encAnimYScale(3);
+      const bottom = encAnimYScale(-3);
+      const ticks = [-2, -1, 0, 1, 2];
+
+      // Faint grid lines
+      encoderAnimCtx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      encoderAnimCtx.lineWidth = 1;
+      ticks.forEach(z => {
+        const xc = encAnimXScale(z);
+        encoderAnimCtx.beginPath();
+        encoderAnimCtx.moveTo(xc, top);
+        encoderAnimCtx.lineTo(xc, bottom);
+        encoderAnimCtx.stroke();
+        const yc = encAnimYScale(z);
+        encoderAnimCtx.beginPath();
+        encoderAnimCtx.moveTo(left, yc);
+        encoderAnimCtx.lineTo(right, yc);
+        encoderAnimCtx.stroke();
+      });
+
+      // Axis lines
+      encoderAnimCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      encoderAnimCtx.lineWidth = 1;
+      encoderAnimCtx.beginPath();
+      encoderAnimCtx.moveTo(left, bottom);
+      encoderAnimCtx.lineTo(right, bottom);
+      encoderAnimCtx.stroke();
+      encoderAnimCtx.beginPath();
+      encoderAnimCtx.moveTo(left, top);
+      encoderAnimCtx.lineTo(left, bottom);
+      encoderAnimCtx.stroke();
+
+      // Tick labels
+      encoderAnimCtx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      encoderAnimCtx.font = '10px JetBrains Mono, monospace';
+      encoderAnimCtx.textAlign = 'center';
+      encoderAnimCtx.textBaseline = 'top';
+      ticks.forEach(z => {
+        encoderAnimCtx.fillText(z.toString(), encAnimXScale(z), bottom + 4);
+      });
+      encoderAnimCtx.textAlign = 'right';
+      encoderAnimCtx.textBaseline = 'middle';
+      ticks.forEach(z => {
+        encoderAnimCtx.fillText(z.toString(), left - 4, encAnimYScale(z));
+      });
+
+      // Axis labels
+      encoderAnimCtx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      encoderAnimCtx.font = '12px Inter, sans-serif';
+      encoderAnimCtx.textAlign = 'center';
+      encoderAnimCtx.textBaseline = 'alphabetic';
+      encoderAnimCtx.fillText('time of day \u2192', (left + right) / 2, ENC_ANIM_H - 6);
+      encoderAnimCtx.save();
+      encoderAnimCtx.translate(12, (top + bottom) / 2);
+      encoderAnimCtx.rotate(-Math.PI / 2);
+      encoderAnimCtx.fillText('time of year \u2192', 0, 0);
+      encoderAnimCtx.restore();
+
+      // Training points faintly
+      if (state.latentCoords) {
+        encoderAnimCtx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        state.latentCoords.forEach(coord => {
+          const cx = encAnimXScale(coord.z[0]);
+          const cy = encAnimYScale(coord.z[1]);
+          encoderAnimCtx.beginPath();
+          encoderAnimCtx.arc(cx, cy, 1.5, 0, Math.PI * 2);
+          encoderAnimCtx.fill();
+        });
+      }
+    }
 
     function setupEncoderGallery() {
       if (!state.latentCoords || !state.thumbnailsLoaded) return;
@@ -2338,22 +2441,9 @@
         };
       });
 
-      // Draw background: faint latent space dots
+      // Draw background: grid + axes + faint latent space dots
       function drawAnimBackground() {
-        encoderAnimCtx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-        encoderAnimCtx.fillRect(0, 0, animW, animH);
-
-        // Draw training points faintly
-        if (state.latentCoords) {
-          encoderAnimCtx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-          state.latentCoords.forEach(coord => {
-            const cx = animXScale(coord.z[0]);
-            const cy = animYScale(coord.z[1]);
-            encoderAnimCtx.beginPath();
-            encoderAnimCtx.arc(cx, cy, 1.5, 0, Math.PI * 2);
-            encoderAnimCtx.fill();
-          });
-        }
+        drawEncoderBackdrop();
       }
 
       // Draw source image faintly on anim canvas
@@ -3305,6 +3395,7 @@
 
       // Setup encoder gallery
       setupEncoderGallery();
+      drawEncoderBackdrop();
 
       // Setup annotation listeners and observe encoder section
       setupAnnotations();
